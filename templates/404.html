@@ -1,0 +1,30 @@
+﻿{% extends "academic/base.html" %}
+
+{% block title %}Error 404 &middot; Página No Encontrada{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center my-auto">
+    <div class="row justify-content-center py-5">
+        <div class="col-md-8 col-lg-6">
+            <div class="card-panel p-5 shadow-lg">
+                <span class="card-tag">Error de Enrutamiento</span>
+                <div class="display-1 fw-extrabold mb-2" style="color: var(--pink); font-size: 5rem; text-shadow: 0 0 25px var(--pink-glow);">
+                    <i class="bi bi-exclamation-octagon-fill"></i> 404
+                </div>
+                <h2 class="h3 fw-bold mb-3">Página No Encontrada</h2>
+                <p class="text-muted mb-4">
+                    La ruta que intentas solicitar no existe en el enrutador de Django. Como parte de la solución de arquitectura para la Evaluación N°1, te redirigimos hacia las rutas válidas del sistema.
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{% url 'index' %}" class="btn-custom btn-custom-primary">
+                        <i class="bi bi-house-door me-1"></i> Ir al Inicio
+                    </a>
+                    <a href="{% url 'courses' %}" class="btn-custom btn-custom-outline">
+                        <i class="bi bi-journal-bookmark me-1"></i> Ir a Cursos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

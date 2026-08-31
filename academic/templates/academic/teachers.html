@@ -1,0 +1,246 @@
+﻿{% extends "academic/base.html" %}
+
+{% block title %}Docentes &middot; Sistema Académico{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3" style="border-bottom: 1px solid var(--border);">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="card-tag mb-0">Enmascaramiento DRF</span>
+                <span class="badge-custom font-monospace">Endpoint: /api/teachers/</span>
+            </div>
+            <h2 class="h3 fw-bold mb-0">Listado de Docentes</h2>
+            <p class="text-muted small mb-0">Entidad <code>Teacher</code> consumida de forma asíncrona mediante <code>fetch()</code>.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn-custom btn-custom-ghost btn-custom-sm" onclick="cargarDocentes()" title="Recargar tabla">
+                <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+            </button>
+            <button class="btn-custom btn-custom-primary btn-custom-sm" data-bs-toggle="modal" data-bs-target="#modalCrearDocente">
+                <i class="bi bi-plus-lg me-1"></i> Nuevo Docente
+            </button>
+        </div>
+    </div>
+
+    <div id="alert-container"></div>
+
+    <div class="card-panel p-0 overflow-hidden mb-4" style="border: 1px solid var(--border);">
+        <div class="table-responsive">
+            <table class="table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th style="padding-left: 24px;">ID</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th style="text-align: right; padding-right: 24px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-docentes">
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <div class="spinner-border spinner-border-sm text-pink me-2" role="status" style="color: var(--pink);"></div>
+                            Cargando docentes desde <code>/api/teachers/</code>...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Crear Docente -->
+<div class="modal fade" id="modalCrearDocente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold">
+                    <span class="logo-dot"></span>Registrar Nuevo Docente
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="form-crear-docente" onsubmit="event.preventDefault(); guardarDocente();">
+                <div class="modal-body p-4">
+                    <div class="form-field">
+                        <label for="crear-teacher-firstname">Nombre</label>
+                        <input type="text" id="crear-teacher-firstname" required placeholder="Ej: Marcelo">
+                    </div>
+                    <div class="form-field">
+                        <label for="crear-teacher-lastname">Apellido</label>
+                        <input type="text" id="crear-teacher-lastname" required placeholder="Ej: Alvarado">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-custom btn-custom-ghost btn-custom-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-custom btn-custom-primary btn-custom-sm"><i class="bi bi-save me-1"></i> Guardar Docente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Editar Docente -->
+<div class="modal fade" id="modalEditarDocente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold">
+                    <span class="logo-dot"></span>Modificar Docente
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="form-editar-docente" onsubmit="event.preventDefault(); actualizarDocente();">
+                <input type="hidden" id="editar-teacher-id">
+                <div class="modal-body p-4">
+                    <div class="form-field">
+                        <label for="editar-teacher-firstname">Nombre</label>
+                        <input type="text" id="editar-teacher-firstname" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="editar-teacher-lastname">Apellido</label>
+                        <input type="text" id="editar-teacher-lastname" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-custom btn-custom-ghost btn-custom-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-custom btn-custom-primary btn-custom-sm"><i class="bi bi-check2-circle me-1"></i> Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let docentesGlobales = [];
+    let modalCrearBS = null;
+    let modalEditarBS = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        modalCrearBS = new bootstrap.Modal(document.getElementById('modalCrearDocente'));
+        modalEditarBS = new bootstrap.Modal(document.getElementById('modalEditarDocente'));
+        cargarDocentes();
+    });
+
+    function getCsrfToken() {
+        const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        return tokenInput ? tokenInput.value : '';
+    }
+
+    function mostrarAlerta(mensaje, tipo = 'success') {
+        const container = document.getElementById('alert-container');
+        const alertDiv = document.createElement('div');
+        const badgeClass = tipo === 'success' ? 'badge-green' : (tipo === 'danger' ? 'badge-pink' : 'badge-purple');
+        alertDiv.className = `alert card-panel py-3 px-4 mb-3 d-flex justify-content-between align-items-center`;
+        alertDiv.style.border = '1px solid var(--pink)';
+        alertDiv.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge-custom ${badgeClass}"><i class="bi bi-bell-fill"></i></span>
+                <span style="color: var(--text);">${mensaje}</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        `;
+        container.innerHTML = '';
+        container.appendChild(alertDiv);
+        setTimeout(() => {
+            if (alertDiv) {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
+                bsAlert.close();
+            }
+        }, 4000);
+    }
+
+    function cargarDocentes() {
+        const tabla = document.getElementById('tabla-docentes');
+        fetch('/api/teachers/')
+            .then(res => res.json())
+            .then(data => {
+                docentesGlobales = data;
+                tabla.innerHTML = '';
+                if (data.length === 0) {
+                    tabla.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-muted">No hay docentes registrados.</td></tr>';
+                    return;
+                }
+                data.forEach(t => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td style="padding-left: 24px; font-weight: 700; color: var(--pink);">#${t.id}</td>
+                        <td style="font-weight: 600; color: var(--text);">${t.first_name}</td>
+                        <td style="color: var(--text);">${t.last_name}</td>
+                        <td style="text-align: right; padding-right: 24px;">
+                            <button class="btn-custom btn-custom-outline btn-custom-sm me-1" onclick="abrirModalEditarDocente(${t.id})" title="Editar"><i class="bi bi-pencil"></i></button>
+                            <button class="btn-custom btn-custom-danger btn-custom-sm" onclick="eliminarDocente(${t.id}, '${t.first_name} ${t.last_name}')" title="Eliminar"><i class="bi bi-trash"></i></button>
+                        </td>
+                    `;
+                    tabla.appendChild(fila);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                tabla.innerHTML = `<tr><td colspan="4" class="text-center py-4" style="color: var(--red);">Error al cargar: ${err.message}</td></tr>`;
+            });
+    }
+
+    function guardarDocente() {
+        const datos = {
+            first_name: document.getElementById('crear-teacher-firstname').value.trim(),
+            last_name: document.getElementById('crear-teacher-lastname').value.trim()
+        };
+
+        fetch('/api/teachers/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+            body: JSON.stringify(datos)
+        })
+        .then(res => res.json())
+        .then(data => {
+            modalCrearBS.hide();
+            document.getElementById('form-crear-docente').reset();
+            mostrarAlerta(`Docente <strong>${data.first_name} ${data.last_name}</strong> registrado.`, 'success');
+            cargarDocentes();
+        });
+    }
+
+    function abrirModalEditarDocente(id) {
+        const t = docentesGlobales.find(item => item.id === id);
+        if (!t) return;
+        document.getElementById('editar-teacher-id').value = t.id;
+        document.getElementById('editar-teacher-firstname').value = t.first_name;
+        document.getElementById('editar-teacher-lastname').value = t.last_name;
+        modalEditarBS.show();
+    }
+
+    function actualizarDocente() {
+        const id = document.getElementById('editar-teacher-id').value;
+        const datos = {
+            first_name: document.getElementById('editar-teacher-firstname').value.trim(),
+            last_name: document.getElementById('editar-teacher-lastname').value.trim()
+        };
+
+        fetch(`/api/teachers/${id}/`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+            body: JSON.stringify(datos)
+        })
+        .then(res => res.json())
+        .then(data => {
+            modalEditarBS.hide();
+            mostrarAlerta(`Docente <strong>${data.first_name} ${data.last_name}</strong> modificado.`, 'warning');
+            cargarDocentes();
+        });
+    }
+
+    function eliminarDocente(id, nombre) {
+        if (!confirm(`¿Eliminar al docente "${nombre}"?`)) return;
+        fetch(`/api/teachers/${id}/`, {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': getCsrfToken() }
+        })
+        .then(() => {
+            mostrarAlerta(`Docente <strong>${nombre}</strong> eliminado.`, 'danger');
+            cargarDocentes();
+        });
+    }
+</script>
+{% endblock %}

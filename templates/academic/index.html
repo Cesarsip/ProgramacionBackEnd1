@@ -1,0 +1,158 @@
+﻿{% extends "academic/base.html" %}
+
+{% block title %}Inicio &middot; Sistema de Gestión Académica{% endblock %}
+
+{% block content %}
+<!-- ========== HERO ========== -->
+<section class="py-5 text-center">
+    <div class="container py-4">
+        <span class="badge-custom badge-pink mb-3 px-3 py-1.5" style="font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase;">
+            <i class="bi bi-shield-check me-1"></i> Evaluación N°1 &middot; Solución Error 404 & DRF Enmascarado
+        </span>
+        <h1 class="display-4 fw-extrabold mb-3 mt-2" style="font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800;">
+            Gestión Académica con <span class="accent-gradient">Django & DRF</span>
+        </h1>
+        <p class="text-muted mx-auto mb-4" style="max-width: 680px; font-size: 1.08rem;">
+            Plataforma desarrollada para la Unidad 1 de Desarrollo Backend (Docente: <strong>Marcelo Alvarado</strong>). Implementa el modelo entidad-relación de la institución sustituyendo la interfaz nativa de DRF por vistas HTML tradicionales que consumen la API REST mediante <code>fetch()</code> asíncrono.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{% url 'courses' %}" class="btn-custom btn-custom-primary btn-custom-lg">
+                <i class="bi bi-journal-text me-1"></i> Ver Cursos & Profesores
+            </a>
+            <a href="{% url 'students' %}" class="btn-custom btn-custom-outline btn-custom-lg">
+                <i class="bi bi-mortarboard me-1"></i> Ver Estudiantes
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ========== ENTIDADES DEL MODELO ER ========== -->
+<section class="py-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+            <div>
+                <p class="card-tag mb-1">Modelo de Datos Relacional</p>
+                <h2 class="h3 fw-bold mb-0">Entidades del Sistema Académico</h2>
+            </div>
+            <span class="text-muted small">Base de datos normalizada (1FN, 2FN, 3FN)</span>
+        </div>
+
+        <div class="row g-4">
+            <!-- Entidad 1: Teacher -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card-panel h-100">
+                    <span class="card-tag">Entidad 1</span>
+                    <h3 class="h5 fw-bold mb-2"><i class="bi bi-person-badge-fill text-pink me-2"></i>Teacher</h3>
+                    <p class="text-muted small mb-3">
+                        Docentes que imparten asignaturas en la institución educativa.
+                    </p>
+                    <ul class="text-muted small list-unstyled mb-3 font-monospace">
+                        <li>&bull; id (PK)</li>
+                        <li>&bull; first_name (VARCHAR)</li>
+                        <li>&bull; last_name (VARCHAR)</li>
+                    </ul>
+                    <a href="{% url 'teachers' %}" class="btn-custom btn-custom-outline btn-custom-sm btn-custom-block">
+                        Ver Docentes
+                    </a>
+                </div>
+            </div>
+
+            <!-- Entidad 2: Course -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card-panel h-100">
+                    <span class="card-tag">Entidad 2</span>
+                    <h3 class="h5 fw-bold mb-2"><i class="bi bi-journal-bookmark-fill text-pink me-2"></i>Course</h3>
+                    <p class="text-muted small mb-3">
+                        Asignaturas curriculares asignadas a un docente (Relación 1:N).
+                    </p>
+                    <ul class="text-muted small list-unstyled mb-3 font-monospace">
+                        <li>&bull; id (PK)</li>
+                        <li>&bull; name (VARCHAR)</li>
+                        <li>&bull; teacher_id (FK &rarr; Teacher)</li>
+                    </ul>
+                    <a href="{% url 'courses' %}" class="btn-custom btn-custom-primary btn-custom-sm btn-custom-block">
+                        Ver Cursos
+                    </a>
+                </div>
+            </div>
+
+            <!-- Entidad 3: Student -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card-panel h-100">
+                    <span class="card-tag">Entidad 3</span>
+                    <h3 class="h5 fw-bold mb-2"><i class="bi bi-mortarboard-fill text-pink me-2"></i>Student</h3>
+                    <p class="text-muted small mb-3">
+                        Estudiantes matriculados activos en los planes académicos.
+                    </p>
+                    <ul class="text-muted small list-unstyled mb-3 font-monospace">
+                        <li>&bull; id (PK)</li>
+                        <li>&bull; first_name (VARCHAR)</li>
+                        <li>&bull; last_name (VARCHAR)</li>
+                    </ul>
+                    <a href="{% url 'students' %}" class="btn-custom btn-custom-outline btn-custom-sm btn-custom-block">
+                        Ver Estudiantes
+                    </a>
+                </div>
+            </div>
+
+            <!-- Entidad 4: StudentCourse -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card-panel h-100">
+                    <span class="card-tag">Entidad 4 (N:M)</span>
+                    <h3 class="h5 fw-bold mb-2"><i class="bi bi-ui-checks text-pink me-2"></i>StudentCourse</h3>
+                    <p class="text-muted small mb-3">
+                        Tabla intermedia de inscripciones entre alumnos y cursos.
+                    </p>
+                    <ul class="text-muted small list-unstyled mb-3 font-monospace">
+                        <li>&bull; student_id (PK, FK)</li>
+                        <li>&bull; course_id (PK, FK)</li>
+                    </ul>
+                    <a href="{% url 'enrollments' %}" class="btn-custom btn-custom-ghost btn-custom-sm btn-custom-block">
+                        Ver Inscripciones
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== ARQUITECTURA DE ENMASCARAMIENTO ========== -->
+<section class="py-5">
+    <div class="container">
+        <div class="card-panel p-4 p-md-5">
+            <div class="row align-items-center gy-4">
+                <div class="col-lg-7">
+                    <span class="card-tag">Patrón de Diseño Backend</span>
+                    <h2 class="h3 fw-bold mb-3">Enmascaramiento de Endpoints DRF</h2>
+                    <p class="text-muted mb-3">
+                        En lugar de exponer la interfaz navegable nativa (Browsable API), el servidor entrega cascarones de plantillas HTML. JavaScript asíncrono intercepta las peticiones y se comunica con la API REST protegida por tokens CSRF:
+                    </p>
+                    <div class="d-flex gap-2 flex-wrap mb-4">
+                        <span class="badge-custom badge-pink">1. Django render() entrega plantilla</span>
+                        <span class="badge-custom badge-purple">2. fetch() solicita JSON</span>
+                        <span class="badge-custom badge-green">3. DOM renderiza dinámicamente</span>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'courses' %}" class="btn-custom btn-custom-primary">
+                            <i class="bi bi-play-circle-fill me-1"></i> Probar Consumo Asíncrono
+                        </a>
+                        <a href="/api/courses/" target="_blank" class="btn-custom btn-custom-outline">
+                            <i class="bi bi-braces me-1"></i> Endpoint Crudo (/api/courses/)
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5 text-center">
+                    <div class="p-4 rounded-3 text-start font-monospace" style="background: var(--bg-panel-2); border: 1px dashed var(--border); font-size: 0.82rem;">
+                        <div class="text-muted mb-2">// Petición asíncrona de ejemplo:</div>
+                        <div style="color: var(--pink);">fetch('/api/courses/')</div>
+                        <div class="text-white ps-3">.then(res =&gt; res.json())</div>
+                        <div class="text-white ps-3">.then(data =&gt; {</div>
+                        <div class="text-success ps-4">// Inyecta datos en tabla HTML</div>
+                        <div class="text-white ps-3">});</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

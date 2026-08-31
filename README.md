@@ -1,70 +1,78 @@
-﻿# Evaluación 1: Programación BackEnd (INACAP) Ejercicio 
-## Solución al "Error 404" & Sustitución / Enmascaramiento de Endpoints DRF mediante Plantillas HTML
+﻿# Sistema de Gestión Académica &middot; Evaluación N°1 Backend (Django & DRF)
+## Docente: Marcelo Alvarado &middot; Carrera: Informática y Ciberseguridad &middot; INACAP
 
-Este proyecto corresponde al desarrollo integral de la **Evaluación 1 (Tareas 1 y 2)**, implementado con **Django 6.1** y **Django REST Framework (DRF) 3.18**.
-
----
-
-## 🏛️ Contexto del Proyecto
-
-- **Empresa / Proyecto:** **TechNova Solutions** (Plataforma y consultora de ingeniería de software backend).
-- **Profesor:** Marcelo Alvarado.
-- **Asignatura:** Programación BackEnd / Informática y Ciberseguridad.
+Este repositorio contiene la solución completa a la **Evaluación N°1: Desarrollo Backend con Django & DRF** (Ponderación 15%), estructurada según el modelo entidad-relación entregado y aplicando la arquitectura de **enmascaramiento de endpoints** mediante plantillas HTML y consumo asíncrono con JavaScript Fetch.
 
 ---
 
-## 🚀 Características Principales
+## 🏛️ Estructura del Proyecto
 
-1. **Solución Definitiva al "Error 404":**
-   - Se erradica la pantalla por defecto 404 en la raíz del servidor (`http://127.0.0.1:8000/`) enrutándola a una vista de inicio profesional (`index.html`).
-   - Se incluye un manejador `handler404` con una plantilla personalizada (`404.html`) que orienta al usuario en caso de rutas inexistentes.
-
-2. **Esquema Web Completo (Vistas HTML):**
-   - **Inicio (`/`):** Portal corporativo con métricas y resumen de arquitectura.
-   - **Gestión de Programadores (`/programadores/`):** Interfaz interactiva para administrar desarrolladores (CRUD en tiempo real).
-   - **Servicios (`/servicios/`):** Catálogo de soluciones backend con mención a la normalización de bases de datos (1NF, 2NF, 3NF).
-   - **Contacto (`/contacto/`):** Formulario de contacto empresarial.
-
-3. **Arquitectura de Sustitución y Enmascaramiento:**
-   - **Backend Dual:** Separación entre la entrega de plantillas tradicionales (`render()`) y el consumo puro de datos REST (`ModelViewSet`).
-   - **Consumo Asíncrono:** La plantilla HTML (`programmers.html`) consume `/api/programmers/` en segundo plano utilizando JavaScript moderno (`fetch()`).
-   - **Seguridad CSRF:** Cada petición destructiva (`POST`, `PUT`, `DELETE`) inyecta el token de seguridad `X-CSRFToken` capturado del DOM.
-   - **Inspector JSON en Vivo:** Panel interactivo para visualizar el payload JSON que retorna DRF en tiempo real.
-
----
-
-## ⚙️ Instrucciones de Ejecución
-
-### 1. Activar entorno virtual (si aplica)
-```powershell
-.\env\Scripts\activate
+```
+ProgramacionBackEnd_Eva1/
+│
+├── manage.py
+├── prompts.md                   # Entregable de IA (Criterio 8)
+├── INTERROGACION.md             # Guía de preguntas y respuestas para la evaluación oral
+├── README.md                    # Documentación del proyecto
+│
+├── data/
+│   └── academic_mock.json       # Datos simulados en formato JSON (Criterio 2)
+│
+├── academic_project/            # Configuración del proyecto Django (Criterio 1)
+│   ├── settings.py              # Configuración de apps, DRF y templates
+│   ├── urls.py                  # URLs raíz y manejador handler404
+│   ├── asgi.py
+│   └── wsgi.py
+│
+├── academic/                    # Aplicación de gestión académica (Criterio 1)
+│   ├── models.py                # Modelos ER: Teacher, Course, Student, StudentCourse
+│   ├── serializers.py           # Serializadores DRF (Criterio 6)
+│   ├── views.py                 # Dualidad: Vistas HTML render() y ViewSets DRF
+│   ├── urls.py                  # Rutas expuestas y DefaultRouter (/api/...)
+│   ├── admin.py                 # Registro en panel de administración Django
+│   ├── tests.py                 # Suite de pruebas unitarias automatizadas
+│   └── apps.py
+│
+└── templates/academic/          # Plantillas HTML con tema Dark Mode + Acento Rosa
+    ├── base.html                # Menú de navegación Bootstrap y CSRF Token global
+    ├── index.html               # Solución al error 404 en la raíz ("/")
+    ├── courses.html             # Listado de Cursos y su Profesor asignado (Fetch API)
+    ├── students.html            # Listado de Estudiantes (Fetch API)
+    ├── teachers.html            # Listado de Docentes (Fetch API)
+    ├── enrollments.html         # Inscripciones de alumnos en cursos (Relación N:M)
+    └── 404.html                 # Manejador personalizado de error 404
 ```
 
-### 2. Ejecutar Migraciones (ya aplicadas por defecto en SQLite)
-```powershell
-py manage.py makemigrations
-py manage.py migrate
-```
+---
 
-### 3. Iniciar el Servidor de Desarrollo
+## 🚀 Instrucciones de Ejecución
+
+### 1. Iniciar el Servidor de Desarrollo
 ```powershell
 py manage.py runserver
 ```
 
 ---
 
-## 🔑 Credenciales de Acceso
+## 🔑 Rutas y Credenciales de Acceso
 
-- **URL del Sitio Principal:** [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
-- **Gestión de Programadores:** [http://127.0.0.1:8000/programadores/](http://127.0.0.1:8000/programadores/)
-- **Endpoint DRF Puro:** [http://127.0.0.1:8000/api/programmers/](http://127.0.0.1:8000/api/programmers/)
+- **Portada / Inicio (Solución Error 404):** [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+- **Cursos y Profesores Asignados:** [http://127.0.0.1:8000/cursos/](http://127.0.0.1:8000/cursos/)
+- **Listado de Estudiantes:** [http://127.0.0.1:8000/estudiantes/](http://127.0.0.1:8000/estudiantes/)
+- **Listado de Docentes:** [http://127.0.0.1:8000/docentes/](http://127.0.0.1:8000/docentes/)
+- **Inscripciones (N:M):** [http://127.0.0.1:8000/inscripciones/](http://127.0.0.1:8000/inscripciones/)
+- **Endpoints API REST (DRF):**
+  - `/api/teachers/`
+  - `/api/courses/`
+  - `/api/students/`
+  - `/api/student-courses/`
 - **Panel Django Admin:** [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
   - **Usuario:** `profe`
   - **Contraseña:** `123456`
 
 ---
 
-## 🧪 Ejecutar Pruebas Automatizadas
+## 🧪 Ejecución de Pruebas Automatizadas
 
 ```powershell
 py manage.py test

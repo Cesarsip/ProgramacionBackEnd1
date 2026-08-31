@@ -1,0 +1,30 @@
+﻿{
+  "teachers": [
+    { "id": 1, "first_name": "Marcelo", "last_name": "Alvarado" },
+    { "id": 2, "first_name": "Alan", "last_name": "Turing" },
+    { "id": 3, "first_name": "Ada", "last_name": "Lovelace" },
+    { "id": 4, "first_name": "Grace", "last_name": "Hopper" }
+  ],
+  "courses": [
+    { "id": 1, "name": "Desarrollo Backend con Django & DRF", "teacher_id": 1 },
+    { "id": 2, "name": "Bases de Datos & Normalización", "teacher_id": 1 },
+    { "id": 3, "name": "Teoría de la Computación & Algoritmos", "teacher_id": 2 },
+    { "id": 4, "name": "Arquitectura de Software & Microservicios", "teacher_id": 3 },
+    { "id": 5, "name": "Compiladores & Lenguajes de Programación", "teacher_id": 4 }
+  ],
+  "students": [
+    { "id": 1, "first_name": "César", "last_name": "Silva" },
+    { "id": 2, "first_name": "Juan", "last_name": "Pérez" },
+    { "id": 3, "first_name": "Ana", "last_name": "Ríos" },
+    { "id": 4, "first_name": "René", "last_name": "Roca" },
+    { "id": 5, "first_name": "Luis", "last_name": "García" }
+  ],
+  "student_courses": [
+    { "student_id": 1, "course_id": 1 },
+    { "student_id": 1, "course_id": 2 },
+    { "student_id": 2, "course_id": 1 },
+    { "student_id": 3, "course_id": 3 },
+    { "student_id": 4, "course_id": 2 },
+    { "student_id": 5, "course_id": 4 }
+  ]
+}
