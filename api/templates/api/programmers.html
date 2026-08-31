@@ -1,0 +1,427 @@
+﻿{% extends "api/base.html" %}
+
+{% block title %}Programadores (CRUD) &middot; TechNova Solutions{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header de la sección -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3" style="border-bottom: 1px solid var(--border);">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="card-tag mb-0">Enmascaramiento DRF</span>
+                <span class="badge-custom font-monospace">Endpoint: /api/programmers/</span>
+            </div>
+            <h2 class="h3 fw-bold mb-0">Gestión de Programadores</h2>
+            <p class="text-muted small mb-0">Consumo asíncrono con JavaScript <code>fetch()</code> y token de seguridad CSRF.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn-custom btn-custom-ghost btn-custom-sm" onclick="cargarProgramadores()" title="Recargar tabla">
+                <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+            </button>
+            <button class="btn-custom btn-custom-primary btn-custom-sm" data-bs-toggle="modal" data-bs-target="#modalCrear">
+                <i class="bi bi-plus-lg me-1"></i> Nuevo Programador
+            </button>
+        </div>
+    </div>
+
+    <!-- Alertas dinámicas de JavaScript -->
+    <div id="alert-container"></div>
+
+    <!-- Barra de Filtros y Búsqueda -->
+    <div class="card-panel p-3 mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text border-0" style="background: var(--bg-panel-2); color: var(--text-muted);"><i class="bi bi-search"></i></span>
+                    <input type="text" id="filtro-busqueda" class="form-control" placeholder="Buscar por nombre, nickname o lenguaje..." onkeyup="filtrarTabla()">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select id="filtro-lenguaje" class="form-select" onchange="filtrarTabla()">
+                    <option value="">Todos los lenguajes</option>
+                    <option value="Python">Python</option>
+                    <option value="JavaScript">JavaScript</option>
+                    <option value="C">C / C++ / C#</option>
+                    <option value="Assembly">Assembly</option>
+                    <option value="COBOL">COBOL</option>
+                    <option value="Java">Java</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-md-end">
+                <span id="contador-programadores" class="badge-custom badge-pink px-3 py-2">Cargando...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla Dinámica de Programadores -->
+    <div class="card-panel p-0 overflow-hidden mb-4" style="border: 1px solid var(--border);">
+        <div class="table-responsive">
+            <table class="table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th style="padding-left: 24px;">ID</th>
+                        <th>Nombre Completo</th>
+                        <th>Nickname</th>
+                        <th>Lenguaje</th>
+                        <th>Edad</th>
+                        <th>Estado</th>
+                        <th style="text-align: right; padding-right: 24px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-programadores">
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <div class="spinner-border spinner-border-sm text-pink me-2" role="status" style="color: var(--pink);"></div>
+                            Cargando registros desde <code>/api/programmers/</code>...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Acordeón: Inspección en Vivo del JSON REST -->
+    <div class="card-panel p-0 overflow-hidden mb-5">
+        <div class="p-3 d-flex justify-content-between align-items-center" style="background: var(--bg-panel-2); cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseDRF">
+            <span class="fw-bold small" style="color: var(--text);">
+                <i class="bi bi-braces me-2 text-pink" style="color: var(--pink);"></i> Inspeccionar Respuesta JSON en Tiempo Real (DRF Raw Payload)
+            </span>
+            <i class="bi bi-chevron-down text-muted"></i>
+        </div>
+        <div id="collapseDRF" class="collapse">
+            <div class="p-3" style="background: #09090c; border-top: 1px solid var(--border);">
+                <pre id="json-raw-output" class="font-monospace mb-0" style="color: #38bdf8; font-size: 0.85rem; max-height: 250px; overflow-y: auto;">// Aquí se refleja la respuesta exacta que devuelve /api/programmers/</pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Crear Programador -->
+<div class="modal fade" id="modalCrear" tabindex="-1" aria-labelledby="modalCrearLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold" id="modalCrearLabel">
+                    <span class="logo-dot"></span>Registrar Nuevo Programador
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="form-crear" onsubmit="event.preventDefault(); guardarProgramador();">
+                <div class="modal-body p-4">
+                    <div class="form-field">
+                        <label for="crear-fullname">Nombre Completo</label>
+                        <input type="text" id="crear-fullname" required placeholder="Ej: Marcelo Alvarado">
+                    </div>
+                    <div class="form-field">
+                        <label for="crear-nickname">Nickname</label>
+                        <input type="text" id="crear-nickname" required placeholder="Ej: malvarado">
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-7">
+                            <div class="form-field">
+                                <label for="crear-language">Lenguaje</label>
+                                <input type="text" id="crear-language" required placeholder="Ej: Python / Django">
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <div class="form-field">
+                                <label for="crear-age">Edad</label>
+                                <input type="number" id="crear-age" required min="16" max="99" value="25">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="crear-is_active" checked style="background-color: var(--pink); border-color: var(--pink);">
+                        <label class="form-check-label small" for="crear-is_active" style="color: var(--text);">Programador Activo</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-custom btn-custom-ghost btn-custom-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-custom btn-custom-primary btn-custom-sm"><i class="bi bi-save me-1"></i> Guardar en DRF</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Editar Programador -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold" id="modalEditarLabel">
+                    <span class="logo-dot"></span>Modificar Programador
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="form-editar" onsubmit="event.preventDefault(); actualizarProgramador();">
+                <input type="hidden" id="editar-id">
+                <div class="modal-body p-4">
+                    <div class="form-field">
+                        <label for="editar-fullname">Nombre Completo</label>
+                        <input type="text" id="editar-fullname" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="editar-nickname">Nickname</label>
+                        <input type="text" id="editar-nickname" required>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-7">
+                            <div class="form-field">
+                                <label for="editar-language">Lenguaje</label>
+                                <input type="text" id="editar-language" required>
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <div class="form-field">
+                                <label for="editar-age">Edad</label>
+                                <input type="number" id="editar-age" required min="16" max="99">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="editar-is_active" style="background-color: var(--pink); border-color: var(--pink);">
+                        <label class="form-check-label small" for="editar-is_active" style="color: var(--text);">Programador Activo</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-custom btn-custom-ghost btn-custom-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-custom btn-custom-primary btn-custom-sm"><i class="bi bi-check2-circle me-1"></i> Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let programadoresGlobales = [];
+    let modalCrearBS = null;
+    let modalEditarBS = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        modalCrearBS = new bootstrap.Modal(document.getElementById('modalCrear'));
+        modalEditarBS = new bootstrap.Modal(document.getElementById('modalEditar'));
+        cargarProgramadores();
+    });
+
+    // Helper: Extraer Token CSRF del DOM
+    function getCsrfToken() {
+        const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        return tokenInput ? tokenInput.value : '';
+    }
+
+    // Helper: Mostrar notificaciones
+    function mostrarAlerta(mensaje, tipo = 'success') {
+        const container = document.getElementById('alert-container');
+        const alertDiv = document.createElement('div');
+        const badgeClass = tipo === 'success' ? 'badge-green' : (tipo === 'danger' ? 'badge-pink' : 'badge-purple');
+        alertDiv.className = `alert card-panel py-3 px-4 mb-3 d-flex justify-content-between align-items-center`;
+        alertDiv.style.border = '1px solid var(--pink)';
+        alertDiv.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge-custom ${badgeClass}"><i class="bi bi-bell-fill"></i></span>
+                <span style="color: var(--text);">${mensaje}</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        `;
+        container.innerHTML = '';
+        container.appendChild(alertDiv);
+        setTimeout(() => {
+            if (alertDiv) {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alertDiv);
+                bsAlert.close();
+            }
+        }, 4000);
+    }
+
+    // 1. Proceso de lectura asíncrona (GET)
+    function cargarProgramadores() {
+        const tabla = document.getElementById('tabla-programadores');
+        fetch('/api/programmers/')
+            .then(response => {
+                if (!response.ok) throw new Error('Error al conectar con /api/programmers/');
+                return response.json();
+            })
+            .then(data => {
+                programadoresGlobales = data;
+                renderizarTabla(data);
+                document.getElementById('json-raw-output').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('contador-programadores').textContent = `${data.length} Desarrolladores`;
+            })
+            .catch(error => {
+                console.error('Error al cargar datos de la API:', error);
+                tabla.innerHTML = `<tr><td colspan="7" class="text-center py-4" style="color: var(--red);"><i class="bi bi-x-circle me-2"></i>Error al consultar la API: ${error.message}</td></tr>`;
+            });
+    }
+
+    // Renderizado dinámico de la tabla
+    function renderizarTabla(lista) {
+        const tabla = document.getElementById('tabla-programadores');
+        tabla.innerHTML = '';
+
+        if (lista.length === 0) {
+            tabla.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">No se encontraron programadores registrados. Haz clic en "Nuevo Programador" para agregar uno.</td></tr>`;
+            return;
+        }
+
+        lista.forEach(p => {
+            const badgeEstado = p.is_active 
+                ? '<span class="badge-custom badge-green"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Activo</span>'
+                : '<span class="badge-custom badge-pink"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Inactivo</span>';
+
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td style="padding-left: 24px; font-weight: 700; color: var(--pink);">#${p.id}</td>
+                <td style="font-weight: 600; color: var(--text);">${p.fullname}</td>
+                <td><span class="badge-custom">@${p.nickname}</span></td>
+                <td><span class="badge-custom badge-purple">${p.language}</span></td>
+                <td>${p.age} años</td>
+                <td>${badgeEstado}</td>
+                <td style="text-align: right; padding-right: 24px;">
+                    <button class="btn-custom btn-custom-outline btn-custom-sm me-1" onclick="abrirModalEditar(${p.id})" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn-custom btn-custom-danger btn-custom-sm" onclick="eliminarProgramador(${p.id}, '${p.fullname}')" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+            tabla.appendChild(fila);
+        });
+    }
+
+    // 2. Proceso de escritura asíncrona (POST) con Token CSRF
+    function guardarProgramador() {
+        const datos = {
+            fullname: document.getElementById('crear-fullname').value.trim(),
+            nickname: document.getElementById('crear-nickname').value.trim(),
+            language: document.getElementById('crear-language').value.trim(),
+            age: parseInt(document.getElementById('crear-age').value),
+            is_active: document.getElementById('crear-is_active').checked
+        };
+
+        const csrfToken = getCsrfToken();
+
+        fetch('/api/programmers/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(datos)
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Error al registrar programador');
+            return response.json();
+        })
+        .then(data => {
+            modalCrearBS.hide();
+            document.getElementById('form-crear').reset();
+            document.getElementById('crear-is_active').checked = true;
+            mostrarAlerta(`Programador <strong>${data.fullname}</strong> agregado con éxito.`, 'success');
+            cargarProgramadores();
+        })
+        .catch(error => {
+            console.error('Error POST:', error);
+            mostrarAlerta(`Error al guardar: ${error.message}`, 'danger');
+        });
+    }
+
+    // Modal de edición
+    function abrirModalEditar(id) {
+        const p = programadoresGlobales.find(item => item.id === id);
+        if (!p) return;
+
+        document.getElementById('editar-id').value = p.id;
+        document.getElementById('editar-fullname').value = p.fullname;
+        document.getElementById('editar-nickname').value = p.nickname;
+        document.getElementById('editar-language').value = p.language;
+        document.getElementById('editar-age').value = p.age;
+        document.getElementById('editar-is_active').checked = p.is_active;
+
+        modalEditarBS.show();
+    }
+
+    // 3. Proceso de actualización asíncrona (PUT) con Token CSRF
+    function actualizarProgramador() {
+        const id = document.getElementById('editar-id').value;
+        const datos = {
+            fullname: document.getElementById('editar-fullname').value.trim(),
+            nickname: document.getElementById('editar-nickname').value.trim(),
+            language: document.getElementById('editar-language').value.trim(),
+            age: parseInt(document.getElementById('editar-age').value),
+            is_active: document.getElementById('editar-is_active').checked
+        };
+
+        const csrfToken = getCsrfToken();
+
+        fetch(`/api/programmers/${id}/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(datos)
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Error al actualizar datos');
+            return response.json();
+        })
+        .then(data => {
+            modalEditarBS.hide();
+            mostrarAlerta(`Programador <strong>${data.fullname}</strong> actualizado con éxito.`, 'success');
+            cargarProgramadores();
+        })
+        .catch(error => {
+            console.error('Error PUT:', error);
+            mostrarAlerta(`Error al actualizar: ${error.message}`, 'danger');
+        });
+    }
+
+    // 4. Proceso de eliminación asíncrona (DELETE) con Token CSRF
+    function eliminarProgramador(id, nombre) {
+        if (!confirm(`¿Está seguro de que desea eliminar a "${nombre}" del sistema?`)) {
+            return;
+        }
+
+        const csrfToken = getCsrfToken();
+
+        fetch(`/api/programmers/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => {
+            if (response.status === 204 || response.ok) {
+                mostrarAlerta(`Registro de <strong>${nombre}</strong> eliminado correctamente.`, 'danger');
+                cargarProgramadores();
+            } else {
+                throw new Error('No se pudo eliminar el registro.');
+            }
+        })
+        .catch(error => {
+            console.error('Error DELETE:', error);
+            mostrarAlerta(`Error al eliminar: ${error.message}`, 'danger');
+        });
+    }
+
+    // 5. Filtro dinámico
+    function filtrarTabla() {
+        const texto = document.getElementById('filtro-busqueda').value.toLowerCase();
+        const lenguaje = document.getElementById('filtro-lenguaje').value.toLowerCase();
+
+        const filtrados = programadoresGlobales.filter(p => {
+            const coincideTexto = p.fullname.toLowerCase().includes(texto) ||
+                                  p.nickname.toLowerCase().includes(texto) ||
+                                  p.language.toLowerCase().includes(texto);
+            const coincideLenguaje = lenguaje === '' || p.language.toLowerCase().includes(lenguaje);
+            return coincideTexto && coincideLenguaje;
+        });
+
+        renderizarTabla(filtrados);
+    }
+</script>
+{% endblock %}

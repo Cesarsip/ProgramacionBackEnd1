@@ -1,0 +1,120 @@
+﻿{% extends "api/base.html" %}
+
+{% block title %}Inicio &middot; TechNova Solutions{% endblock %}
+
+{% block content %}
+<!-- ========== HERO ========== -->
+<section class="py-5 text-center">
+    <div class="container py-4">
+        <span class="badge-custom badge-pink mb-3 px-3 py-1.5" style="font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase;">
+            <i class="bi bi-shield-check me-1"></i> Solución Error 404 & DRF Enmascarado
+        </span>
+        <h1 class="display-4 fw-extrabold mb-3 mt-2" style="font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800;">
+            Dark mode con <span class="accent-gradient">acento rosa</span>
+        </h1>
+        <p class="text-muted mx-auto mb-4" style="max-width: 620px; font-size: 1.08rem;">
+            Plataforma corporativa que soluciona el error 404 de la raíz en Django REST Framework e implementa la sustitución de endpoints mediante vistas con JavaScript asíncrono (<code>fetch()</code>) y seguridad CSRF.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{% url 'programmers' %}" class="btn-custom btn-custom-primary btn-custom-lg">
+                <i class="bi bi-code-square me-1"></i> Ver Gestión CRUD
+            </a>
+            <a href="{% url 'services' %}" class="btn-custom btn-custom-outline btn-custom-lg">
+                <i class="bi bi-layers me-1"></i> Explorar Servicios
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ========== CARDS / PILARES ========== -->
+<section class="py-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-2">
+            <div>
+                <p class="card-tag mb-1">Arquitectura Backend</p>
+                <h2 class="h3 fw-bold mb-0">Pilares de la Solución</h2>
+            </div>
+            <span class="text-muted small">Django 6.1 + Django REST Framework 3.18</span>
+        </div>
+
+        <div class="row g-4">
+            <!-- Card 1 -->
+            <div class="col-md-4">
+                <div class="card-panel h-100">
+                    <span class="card-tag">Solución</span>
+                    <h3 class="h5 fw-bold mb-2">No Más Error 404</h3>
+                    <p class="text-muted small mb-3">
+                        La ruta raíz <code>/</code> ahora sirve una vista renderizada amigable en lugar del error estándar no encontrado de Django.
+                    </p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge-custom badge-pink">Ruta Raíz</span>
+                        <span class="badge-custom">HTTP 200 OK</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="col-md-4">
+                <div class="card-panel h-100">
+                    <span class="card-tag">Enmascaramiento</span>
+                    <h3 class="h5 fw-bold mb-2">Dualidad DRF + Fetch</h3>
+                    <p class="text-muted small mb-3">
+                        Sustitución de la interfaz Browsable nativa por plantillas HTML que consumen los endpoints REST en segundo plano.
+                    </p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge-custom badge-purple">ModelViewSet</span>
+                        <span class="badge-custom badge-pink">Fetch API</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="col-md-4">
+                <div class="card-panel h-100">
+                    <span class="card-tag">Seguridad</span>
+                    <h3 class="h5 fw-bold mb-2">Protección X-CSRFToken</h3>
+                    <p class="text-muted small mb-3">
+                        Extracción dinámica del token CSRF para autorizar de forma segura peticiones <code>POST</code>, <code>PUT</code> y <code>DELETE</code>.
+                    </p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge-custom badge-green">CSRF Protegido</span>
+                        <span class="badge-custom">REST Auth</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SHOWCASE DE COMPONENTES ========== -->
+<section class="py-5">
+    <div class="container">
+        <div class="card-panel p-4 p-md-5">
+            <div class="row align-items-center gy-4">
+                <div class="col-lg-7">
+                    <span class="card-tag">Módulo Destacado</span>
+                    <h2 class="h2 fw-bold mb-3">Panel de Programadores</h2>
+                    <p class="text-muted mb-4">
+                        Gestiona el registro de desarrolladores en tiempo real. Crea nuevos registros, actualiza sus lenguajes y elimina elementos directamente comunicándote con el endpoint <code>/api/programmers/</code>.
+                    </p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'programmers' %}" class="btn-custom btn-custom-primary">
+                            <i class="bi bi-arrow-right-circle me-1"></i> Ir al Panel CRUD
+                        </a>
+                        <a href="/api/programmers/" target="_blank" class="btn-custom btn-custom-outline">
+                            <i class="bi bi-braces me-1"></i> Ver JSON Crudo
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5 text-center">
+                    <div class="p-4 rounded-3" style="background: var(--bg-panel-2); border: 1px dashed var(--border);">
+                        <i class="bi bi-terminal-fill text-pink fs-1" style="color: var(--pink);"></i>
+                        <h5 class="fw-bold mt-2 mb-1">Consumo Asíncrono</h5>
+                        <p class="text-muted small mb-0 font-monospace">GET /api/programmers/ &rarr; 200 OK</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
