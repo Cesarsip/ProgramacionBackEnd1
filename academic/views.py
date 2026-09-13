@@ -18,6 +18,11 @@ def index_view(request):
     return render(request, 'academic/index.html')
 
 
+def login_view(request):
+    """Renderiza el formulario de acceso de la interfaz web."""
+    return render(request, 'academic/login.html')
+
+
 def courses_view(request):
     """
     Vista de Cursos: 'Máscara' visual que renderiza el cascarón HTML.

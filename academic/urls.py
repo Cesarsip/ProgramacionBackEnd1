@@ -10,6 +10,7 @@ router.register(r'students', views.StudentViewSet, basename='student')
 router.register(r'student-courses', views.StudentCourseViewSet, basename='student-course')
 
 urlpatterns = [
+    path('login/', views.login_view, name='login'),
     # Vistas de Plantillas HTML (Enmascaramiento)
     path('', views.index_view, name='index'),
     path('cursos/', views.courses_view, name='courses'),

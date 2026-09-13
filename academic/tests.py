@@ -20,6 +20,21 @@ class AcademicSystemTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'academic/index.html')
 
+    def test_login_page(self):
+        response = self.client.get('/login/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'academic/login.html')
+
+    def test_jwt_login(self):
+        response = self.client.post(
+            '/api/token/',
+            {'username': 'api-user', 'password': 'safe-password'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response.data)
+        self.assertIn('refresh', response.data)
+
     def test_courses_view(self):
         """Verifica que la vista de cursos cargue correctamente."""
         response = self.client.get('/cursos/')
