@@ -51,13 +51,14 @@
                         <th style="padding-left: 24px;">ID</th>
                         <th>Nombre</th>
                         <th>Apellido</th>
+                        <th>Sexo</th>
                         <th>Cursos Inscritos</th>
                         <th style="text-align: right; padding-right: 24px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-estudiantes">
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
+                        <td colspan="6" class="text-center py-5 text-muted">
                             <div class="spinner-border spinner-border-sm text-pink me-2" role="status" style="color: var(--pink);"></div>
                             Cargando estudiantes desde <code>/api/students/</code>...
                         </td>
@@ -103,6 +104,15 @@
                         <label for="crear-student-lastname">Apellido</label>
                         <input type="text" id="crear-student-lastname" required placeholder="Ej: Pérez">
                     </div>
+                    <div class="form-field">
+                        <label for="crear-student-gender">Sexo</label>
+                        <select id="crear-student-gender" class="form-select" required>
+                            <option value="">Seleccione una opción...</option>
+                            <option value="femenino">Femenino</option>
+                            <option value="masculino">Masculino</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-custom btn-custom-ghost btn-custom-sm" data-bs-dismiss="modal">Cancelar</button>
@@ -133,6 +143,15 @@
                     <div class="form-field">
                         <label for="editar-student-lastname">Apellido</label>
                         <input type="text" id="editar-student-lastname" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="editar-student-gender">Sexo</label>
+                        <select id="editar-student-gender" class="form-select" required>
+                            <option value="">Seleccione una opción...</option>
+                            <option value="femenino">Femenino</option>
+                            <option value="masculino">Masculino</option>
+                            <option value="otro">Otro</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -201,7 +220,7 @@
             })
             .catch(err => {
                 console.error('Error:', err);
-                tabla.innerHTML = `<tr><td colspan="5" class="text-center py-4" style="color: var(--red);"><i class="bi bi-x-circle me-2"></i>Error al consultar /api/students/: ${err.message}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="6" class="text-center py-4" style="color: var(--red);"><i class="bi bi-x-circle me-2"></i>Error al consultar /api/students/: ${err.message}</td></tr>`;
             });
     }
 
@@ -226,6 +245,7 @@
                 <td style="padding-left: 24px; font-weight: 700; color: var(--pink);">#${s.id}</td>
                 <td style="font-weight: 600; color: var(--text);">${s.first_name}</td>
                 <td style="color: var(--text);">${s.last_name}</td>
+                <td><span class="badge-custom badge-pink">${s.gender || 'No informado'}</span></td>
                 <td>${cursosHtml}</td>
                 <td style="text-align: right; padding-right: 24px;">
                     <button class="btn-custom btn-custom-outline btn-custom-sm me-1" onclick="abrirModalEditarEstudiante(${s.id})" title="Editar">
@@ -244,7 +264,8 @@
     function guardarEstudiante() {
         const datos = {
             first_name: document.getElementById('crear-student-firstname').value.trim(),
-            last_name: document.getElementById('crear-student-lastname').value.trim()
+            last_name: document.getElementById('crear-student-lastname').value.trim(),
+            gender: document.getElementById('crear-student-gender').value
         };
 
         fetch('/api/students/', {
@@ -279,6 +300,7 @@
         document.getElementById('editar-student-id').value = est.id;
         document.getElementById('editar-student-firstname').value = est.first_name;
         document.getElementById('editar-student-lastname').value = est.last_name;
+        document.getElementById('editar-student-gender').value = est.gender || '';
 
         modalEditarBS.show();
     }
@@ -288,7 +310,8 @@
         const id = document.getElementById('editar-student-id').value;
         const datos = {
             first_name: document.getElementById('editar-student-firstname').value.trim(),
-            last_name: document.getElementById('editar-student-lastname').value.trim()
+            last_name: document.getElementById('editar-student-lastname').value.trim(),
+            gender: document.getElementById('editar-student-gender').value
         };
 
         fetch(`/api/students/${id}/`, {

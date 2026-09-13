@@ -50,13 +50,14 @@
                     <tr>
                         <th style="padding-left: 24px;">ID</th>
                         <th>Nombre de la Asignatura</th>
+                        <th>Jornada</th>
                         <th>Profesor Asignado (Teacher)</th>
                         <th style="text-align: right; padding-right: 24px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-cursos">
                     <tr>
-                        <td colspan="4" class="text-center py-5 text-muted">
+                        <td colspan="5" class="text-center py-5 text-muted">
                             <div class="spinner-border spinner-border-sm text-pink me-2" role="status" style="color: var(--pink);"></div>
                             Cargando datos asíncronos desde <code>/api/courses/</code>...
                         </td>
@@ -99,6 +100,15 @@
                         <input type="text" id="crear-course-name" required placeholder="Ej: Arquitectura de Software Backend">
                     </div>
                     <div class="form-field">
+                        <label for="crear-course-shift">Jornada</label>
+                        <select id="crear-course-shift" class="form-select" required>
+                            <option value="">Seleccione una jornada...</option>
+                            <option value="diurna">Diurna</option>
+                            <option value="vespertina">Vespertina</option>
+                            <option value="online">Online</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
                         <label for="crear-course-teacher">Profesor Docente</label>
                         <select id="crear-course-teacher" class="form-select" required>
                             <option value="">Seleccione un docente...</option>
@@ -130,6 +140,15 @@
                     <div class="form-field">
                         <label for="editar-course-name">Nombre de la Asignatura</label>
                         <input type="text" id="editar-course-name" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="editar-course-shift">Jornada</label>
+                        <select id="editar-course-shift" class="form-select" required>
+                            <option value="">Seleccione una jornada...</option>
+                            <option value="diurna">Diurna</option>
+                            <option value="vespertina">Vespertina</option>
+                            <option value="online">Online</option>
+                        </select>
                     </div>
                     <div class="form-field">
                         <label for="editar-course-teacher">Profesor Docente</label>
@@ -230,7 +249,7 @@
             })
             .catch(err => {
                 console.error('Error:', err);
-                tabla.innerHTML = `<tr><td colspan="4" class="text-center py-4" style="color: var(--red);"><i class="bi bi-x-circle me-2"></i>Error al consultar /api/courses/: ${err.message}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="5" class="text-center py-4" style="color: var(--red);"><i class="bi bi-x-circle me-2"></i>Error al consultar /api/courses/: ${err.message}</td></tr>`;
             });
     }
 
@@ -249,6 +268,7 @@
             fila.innerHTML = `
                 <td style="padding-left: 24px; font-weight: 700; color: var(--pink);">#${c.id}</td>
                 <td style="font-weight: 600; color: var(--text);">${c.name}</td>
+                <td><span class="badge-custom badge-pink">${c.shift || 'Sin jornada'}</span></td>
                 <td><span class="badge-custom badge-purple"><i class="bi bi-person-fill me-1"></i>${c.teacher_name}</span></td>
                 <td style="text-align: right; padding-right: 24px;">
                     <button class="btn-custom btn-custom-outline btn-custom-sm me-1" onclick="abrirModalEditarCurso(${c.id})" title="Editar">
@@ -267,6 +287,7 @@
     function guardarCurso() {
         const datos = {
             name: document.getElementById('crear-course-name').value.trim(),
+            shift: document.getElementById('crear-course-shift').value,
             teacher: parseInt(document.getElementById('crear-course-teacher').value)
         };
 
@@ -301,6 +322,7 @@
 
         document.getElementById('editar-course-id').value = curso.id;
         document.getElementById('editar-course-name').value = curso.name;
+        document.getElementById('editar-course-shift').value = curso.shift || '';
         cargarDocentesSelect('editar-course-teacher', curso.teacher);
 
         modalEditarBS.show();
@@ -311,6 +333,7 @@
         const id = document.getElementById('editar-course-id').value;
         const datos = {
             name: document.getElementById('editar-course-name').value.trim(),
+            shift: document.getElementById('editar-course-shift').value,
             teacher: parseInt(document.getElementById('editar-course-teacher').value)
         };
 
