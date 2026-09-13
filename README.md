@@ -77,3 +77,106 @@ py manage.py runserver
 ```powershell
 py manage.py test
 ```
+
+## Guía de instalación y consumo de la API
+
+### Instalación
+
+Se recomienda crear y activar un entorno virtual antes de instalar las
+dependencias:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+py -m pip install --upgrade pip
+py -m pip install -r requirements.txt
+py manage.py migrate
+py manage.py createsuperuser
+py manage.py runserver
+```
+
+`requirements.txt` incorpora `djangorestframework`, `djangorestframework-simplejwt`,
+`coreapi` y `django-filter`. La combinación Django 5.2/DRF 3.14 mantiene
+disponible la documentación CoreAPI (`include_docs_urls`).
+
+### Seguridad y documentación
+
+Los cuatro ViewSet (`teachers`, `courses`, `students` y `student-courses`)
+declaran `IsAuthenticated` explícitamente. La autenticación de la API usa
+Bearer JWT:
+
+- `POST http://127.0.0.1:8000/api/token/`
+- `POST http://127.0.0.1:8000/api/token/refresh/`
+- `GET http://127.0.0.1:8000/docs/` (documentación interactiva CoreAPI)
+
+Crear un usuario con `createsuperuser` o desde `/admin/`. En Postman, guardar
+el valor `access` de la respuesta del primer endpoint y enviar en cada
+operación protegida:
+
+```text
+Authorization: Bearer <access>
+```
+
+Solicitud para obtener tokens:
+
+```http
+POST /api/token/
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "tu-clave"
+}
+```
+
+Renovación:
+
+```http
+POST /api/token/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "<refresh>"
+}
+```
+
+### CRUD disponible
+
+Cada recurso expone `GET` de colección y detalle, `POST`, `PUT`, `PATCH` y
+`DELETE` mediante `ModelViewSet`:
+
+```text
+/api/teachers/
+/api/courses/
+/api/students/
+/api/student-courses/
+```
+
+Los identificadores de relaciones se envían como enteros. Por ejemplo, para
+crear un curso:
+
+```json
+{
+  "name": "Desarrollo Backend",
+  "shift": "vespertina",
+  "teacher": 1
+}
+```
+
+### Filtros probados en Postman
+
+Todos los ejemplos requieren el encabezado `Authorization`:
+
+```text
+GET /api/teachers/?last_name=alvarado
+GET /api/courses/?course=backend
+GET /api/courses/?shift=vespertina
+GET /api/students/?last_name=silva
+GET /api/students/?gender=femenino
+GET /api/student-courses/?course=1
+```
+
+`last_name` realiza una búsqueda parcial sin distinguir mayúsculas; `course`
+busca parcialmente por el nombre del curso en `/api/courses/` y por el
+identificador relacionado en `/api/student-courses/`; `gender` y `shift`
+realizan comparación exacta sin distinguir mayúsculas.
