@@ -1,4 +1,5 @@
 ﻿from django.test import TestCase
+from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase
 from .models import Teacher, Course, Student, StudentCourse
@@ -9,6 +10,8 @@ class AcademicSystemTests(APITestCase):
         self.course = Course.objects.create(name="Desarrollo Backend", teacher=self.teacher)
         self.student = Student.objects.create(first_name="César", last_name="Silva")
         self.enrollment = StudentCourse.objects.create(student=self.student, course=self.course)
+        self.user = User.objects.create_user(username='api-user', password='safe-password')
+        self.client.force_authenticate(user=self.user)
 
     # --- PRUEBAS DE VISTAS HTML (ENMASCARAMIENTO Y SOLUCIÓN 404) ---
     def test_root_url_solves_404(self):
@@ -61,3 +64,28 @@ class AcademicSystemTests(APITestCase):
         response = self.client.get('/api/student-courses/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]['course_name'], "Desarrollo Backend")
+
+    def test_api_requires_authentication(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get('/api/teachers/')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_api_filters(self):
+        self.course.shift = 'vespertina'
+        self.course.save(update_fields=['shift'])
+        self.student.gender = 'femenino'
+        self.student.save(update_fields=['gender'])
+
+        teachers = self.client.get('/api/teachers/?last_name=alvar')
+        courses = self.client.get('/api/courses/?shift=VESPERTINA')
+        students = self.client.get('/api/students/?gender=FEMENINO')
+        enrollments = self.client.get(f'/api/student-courses/?course={self.course.id}')
+
+        self.assertEqual(len(teachers.data), 1)
+        self.assertEqual(len(courses.data), 1)
+        self.assertEqual(len(students.data), 1)
+        self.assertEqual(len(enrollments.data), 1)
+
+    def test_api_documentation(self):
+        response = self.client.get('/docs/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

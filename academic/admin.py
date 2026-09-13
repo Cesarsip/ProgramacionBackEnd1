@@ -15,7 +15,7 @@ class TeacherAdmin(admin.ModelAdmin):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'teacher')
+    list_display = ('id', 'name', 'shift', 'teacher')
     list_filter = ('teacher',)
     search_fields = ('name', 'teacher__first_name', 'teacher__last_name')
     ordering = ('id',)
@@ -23,7 +23,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'first_name', 'last_name')
+    list_display = ('id', 'first_name', 'last_name', 'gender')
     search_fields = ('first_name', 'last_name')
     ordering = ('id',)
 

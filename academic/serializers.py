@@ -22,7 +22,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ['id', 'name', 'teacher', 'teacher_name']
+        fields = ['id', 'name', 'shift', 'teacher', 'teacher_name']
 
     def get_teacher_name(self, obj):
         if obj.teacher:
@@ -36,7 +36,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ['id', 'first_name', 'last_name', 'enrolled_courses']
+        fields = ['id', 'first_name', 'last_name', 'gender', 'enrolled_courses']
 
     def get_enrolled_courses(self, obj):
         # Obtener los nombres de los cursos en los que está inscrito el estudiante

@@ -28,6 +28,12 @@ class Course(models.Model):
     Representa los cursos impartidos por un docente (Relación 1 a N).
     """
     name = models.CharField(max_length=150, verbose_name="Nombre de Asignatura")
+    shift = models.CharField(
+        max_length=20,
+        blank=True,
+        default='',
+        verbose_name="Jornada",
+    )
     teacher = models.ForeignKey(
         Teacher, 
         on_delete=models.CASCADE, 
@@ -52,6 +58,12 @@ class Student(models.Model):
     """
     first_name = models.CharField(max_length=100, verbose_name="Nombre")
     last_name = models.CharField(max_length=100, verbose_name="Apellido")
+    gender = models.CharField(
+        max_length=30,
+        blank=True,
+        default='',
+        verbose_name="Sexo",
+    )
 
     class Meta:
         db_table = 'student'

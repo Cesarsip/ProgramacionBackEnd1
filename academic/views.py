@@ -1,8 +1,9 @@
 ﻿from django.shortcuts import render
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import permissions, viewsets
 from .models import Teacher, Course, Student, StudentCourse
 from .serializers import TeacherSerializer, CourseSerializer, StudentSerializer, StudentCourseSerializer
+from .filters import CourseFilter, StudentCourseFilter, StudentFilter, TeacherFilter
 
 # =====================================================================
 # VISTAS DE PLANTILLAS HTML (ENMASCARAMIENTO DE ENDPOINTS)
@@ -66,21 +67,33 @@ class TeacherViewSet(viewsets.ModelViewSet):
     """Endpoint REST CRUD para la entidad Teacher (/api/teachers/)."""
     queryset = Teacher.objects.all().order_by('id')
     serializer_class = TeacherSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TeacherFilter
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     """Endpoint REST CRUD para la entidad Course (/api/courses/)."""
     queryset = Course.objects.select_related('teacher').all().order_by('id')
     serializer_class = CourseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CourseFilter
 
 
 class StudentViewSet(viewsets.ModelViewSet):
     """Endpoint REST CRUD para la entidad Student (/api/students/)."""
     queryset = Student.objects.prefetch_related('student_courses__course').all().order_by('id')
     serializer_class = StudentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StudentFilter
 
 
 class StudentCourseViewSet(viewsets.ModelViewSet):
     """Endpoint REST CRUD para la entidad StudentCourse (/api/student-courses/)."""
     queryset = StudentCourse.objects.select_related('student', 'course').all().order_by('id')
     serializer_class = StudentCourseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StudentCourseFilter
