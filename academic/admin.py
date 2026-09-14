@@ -8,7 +8,7 @@ from .models import Teacher, Course, Student, StudentCourse
 
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
-    list_display = ('id', 'first_name', 'last_name')
+    list_display = ('id', 'first_name', 'last_name', 'teacher_type')
     search_fields = ('first_name', 'last_name')
     ordering = ('id',)
 

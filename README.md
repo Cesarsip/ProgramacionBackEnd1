@@ -96,8 +96,43 @@ py manage.py runserver
 ```
 
 `requirements.txt` incorpora `djangorestframework`, `djangorestframework-simplejwt`,
-`coreapi` y `django-filter`. La combinación Django 5.2/DRF 3.14 mantiene
-disponible la documentación CoreAPI (`include_docs_urls`).
+`coreapi`, `django-filter` y `drf-yasg`. CoreAPI se conserva como librería
+externa para `/docs/`; Swagger/OpenAPI se expone como documentación principal
+en `/swagger/` y `/swagger.json`.
+
+### Qué hace cada bloque y qué ocurre si se elimina
+
+En [settings.py](./academic_project/settings.py), el bloque `INSTALLED_APPS`
+registra DRF y `django_filters`; si se elimina una de esas entradas, Django no
+podrá cargar esa integración. El bloque `REST_FRAMEWORK` selecciona JWT,
+`IsAuthenticated`, filtros y `AutoSchema`; si se elimina, la API puede volver a
+usar autenticación por sesión, dejar endpoints sin protección o no generar el
+esquema CoreAPI.
+
+En [models.py](./academic/models.py), `*_CHOICES` restringe los datos válidos:
+sexo `M/F` (Masculino/Femenino), jornada `D/V` (Despertino/Vespertino) y tipo
+de profesor `CH/CD` (Jornada por hora/Jornada definida). Si se elimina
+`choices`, Django y el serializer aceptarían valores arbitrarios.
+
+En [serializers.py](./academic/serializers.py), `ModelSerializer` valida el
+JSON y lo convierte a modelos; si se elimina un campo, ese dato no aparecerá
+en respuestas ni podrá enviarse desde la API.
+
+En [views.py](./academic/views.py), cada `ModelViewSet` habilita el CRUD y
+declara su permiso. Si se elimina un ViewSet o su registro en el router, esa
+entidad deja de tener sus rutas CRUD. `IsAuthenticated` protege profesores,
+estudiantes y cursos. `ReadOnlyOrAuthenticated` permite consultar asignaturas
+sin login, pero exige JWT para crear, modificar o eliminar.
+
+En [filters.py](./academic/filters.py), cada `FilterSet` traduce parámetros
+como `last_name`, `course`, `gender` y `shift` a consultas seguras del ORM.
+Si se elimina el filtro o `DjangoFilterBackend`, los parámetros URL se
+ignoran.
+
+En [academic_project/urls.py](./academic_project/urls.py), las rutas JWT son
+las que emiten y renuevan tokens; Swagger usa `drf-yasg` para construir el
+contrato OpenAPI. Si se elimina una ruta, el endpoint correspondiente dejará
+de existir, aunque el código de la vista permanezca.
 
 ### Seguridad y documentación
 
@@ -108,6 +143,8 @@ Bearer JWT:
 - `POST http://127.0.0.1:8000/api/token/`
 - `POST http://127.0.0.1:8000/api/token/refresh/`
 - `GET http://127.0.0.1:8000/docs/` (documentación interactiva CoreAPI)
+- `GET http://127.0.0.1:8000/swagger/` (interfaz Swagger UI)
+- `GET http://127.0.0.1:8000/swagger.json` (especificación OpenAPI)
 
 Crear un usuario con `createsuperuser` o desde `/admin/`. En Postman, guardar
 el valor `access` de la respuesta del primer endpoint y enviar en cada
@@ -142,8 +179,10 @@ Content-Type: application/json
 
 ### CRUD disponible
 
-Cada recurso expone `GET` de colección y detalle, `POST`, `PUT`, `PATCH` y
-`DELETE` mediante `ModelViewSet`:
+Profesores, estudiantes y cursos requieren JWT y exponen `GET` de colección y
+detalle, `POST`, `PUT`, `PATCH` y `DELETE` mediante `ModelViewSet`.
+Asignaciones (`student-courses`) permiten `GET` público de solo lectura; sus
+operaciones `POST`, `PUT`, `PATCH` y `DELETE` requieren JWT:
 
 ```text
 /api/teachers/
@@ -158,7 +197,7 @@ crear un curso:
 ```json
 {
   "name": "Desarrollo Backend",
-  "shift": "vespertina",
+  "shift": "V",
   "teacher": 1
 }
 ```
@@ -170,9 +209,9 @@ Todos los ejemplos requieren el encabezado `Authorization`:
 ```text
 GET /api/teachers/?last_name=alvarado
 GET /api/courses/?course=backend
-GET /api/courses/?shift=vespertina
+GET /api/courses/?shift=V
 GET /api/students/?last_name=silva
-GET /api/students/?gender=femenino
+GET /api/students/?gender=F
 GET /api/student-courses/?course=1
 ```
 

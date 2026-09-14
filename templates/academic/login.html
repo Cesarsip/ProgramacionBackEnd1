@@ -41,6 +41,8 @@
 
 {% block extra_js %}
 <script>
+    // Solicita los tokens JWT al endpoint oficial de Simple JWT. Si se
+    // elimina este bloque, el formulario ya no podrá iniciar sesión.
     document.getElementById('login-form').addEventListener('submit', async event => {
         event.preventDefault();
         const button = document.getElementById('login-button');

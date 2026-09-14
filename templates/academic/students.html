@@ -7,12 +7,8 @@
     <!-- Header de la sección -->
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3" style="border-bottom: 1px solid var(--border);">
         <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="card-tag mb-0">Enmascaramiento DRF</span>
-                <span class="badge-custom font-monospace">Endpoint: /api/students/</span>
-            </div>
-            <h2 class="h3 fw-bold mb-0">Listado de Estudiantes</h2>
-            <p class="text-muted small mb-0">Entidad <code>Student</code> consumida de forma asíncrona mediante <code>fetch()</code>.</p>
+            <h2 class="h3 fw-bold mb-0">Estudiantes</h2>
+            <p class="text-muted small mb-0">Consulta y administra los estudiantes registrados.</p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn-custom btn-custom-ghost btn-custom-sm" onclick="cargarEstudiantes()" title="Recargar tabla">
@@ -60,7 +56,7 @@
                     <tr>
                         <td colspan="6" class="text-center py-5 text-muted">
                             <div class="spinner-border spinner-border-sm text-pink me-2" role="status" style="color: var(--pink);"></div>
-                            Cargando estudiantes desde <code>/api/students/</code>...
+                            Cargando estudiantes...
                         </td>
                     </tr>
                 </tbody>
@@ -68,20 +64,6 @@
         </div>
     </div>
 
-    <!-- Acordeón: Inspección en Vivo del JSON REST -->
-    <div class="card-panel p-0 overflow-hidden mb-5">
-        <div class="p-3 d-flex justify-content-between align-items-center" style="background: var(--bg-panel-2); cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseDRF">
-            <span class="fw-bold small" style="color: var(--text);">
-                <i class="bi bi-braces me-2 text-pink" style="color: var(--pink);"></i> Inspeccionar Respuesta JSON en Tiempo Real (/api/students/)
-            </span>
-            <i class="bi bi-chevron-down text-muted"></i>
-        </div>
-        <div id="collapseDRF" class="collapse">
-            <div class="p-3" style="background: #09090c; border-top: 1px solid var(--border);">
-                <pre id="json-raw-output" class="font-monospace mb-0" style="color: #38bdf8; font-size: 0.85rem; max-height: 250px; overflow-y: auto;">// Aquí se refleja la respuesta devuelta por DRF</pre>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- MODAL: Crear Estudiante -->
@@ -108,9 +90,8 @@
                         <label for="crear-student-gender">Sexo</label>
                         <select id="crear-student-gender" class="form-select" required>
                             <option value="">Seleccione una opción...</option>
-                            <option value="femenino">Femenino</option>
-                            <option value="masculino">Masculino</option>
-                            <option value="otro">Otro</option>
+                            <option value="F">Femenino</option>
+                            <option value="M">Masculino</option>
                         </select>
                     </div>
                 </div>
@@ -148,9 +129,8 @@
                         <label for="editar-student-gender">Sexo</label>
                         <select id="editar-student-gender" class="form-select" required>
                             <option value="">Seleccione una opción...</option>
-                            <option value="femenino">Femenino</option>
-                            <option value="masculino">Masculino</option>
-                            <option value="otro">Otro</option>
+                            <option value="F">Femenino</option>
+                            <option value="M">Masculino</option>
                         </select>
                     </div>
                 </div>
@@ -215,7 +195,6 @@
             .then(data => {
                 estudiantesGlobales = data;
                 renderizarTablaEstudiantes(data);
-                document.getElementById('json-raw-output').textContent = JSON.stringify(data, null, 2);
                 document.getElementById('contador-estudiantes').textContent = `${data.length} Alumnos Registrados`;
             })
             .catch(err => {
@@ -235,7 +214,7 @@
         }
 
         lista.forEach(s => {
-            let cursosHtml = '<span class="text-muted small">Sin inscripciones</span>';
+            let cursosHtml = '<span class="text-muted small">Sin asignaturas</span>';
             if (s.enrolled_courses && s.enrolled_courses.length > 0) {
                 cursosHtml = s.enrolled_courses.map(c => `<span class="badge-custom badge-purple me-1 mb-1">${c}</span>`).join('');
             }

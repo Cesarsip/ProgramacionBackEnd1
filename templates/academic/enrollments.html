@@ -1,24 +1,20 @@
 ﻿{% extends "academic/base.html" %}
 
-{% block title %}Inscripciones (N:M) &middot; Sistema Académico{% endblock %}
+{% block title %}Asignaturas &middot; Sistema Académico{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3" style="border-bottom: 1px solid var(--border);">
         <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="card-tag mb-0">Relación N a M</span>
-                <span class="badge-custom font-monospace">Endpoint: /api/student-courses/</span>
-            </div>
-            <h2 class="h3 fw-bold mb-0">Inscripciones de Alumnos en Cursos</h2>
-            <p class="text-muted small mb-0">Entidad <code>StudentCourse</code> que relaciona <code>Student</code> con <code>Course</code>.</p>
+            <h2 class="h3 fw-bold mb-0">Asignaturas</h2>
+            <p class="text-muted small mb-0">Administra las asignaturas de cada estudiante.</p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn-custom btn-custom-ghost btn-custom-sm" onclick="cargarInscripciones()" title="Recargar tabla">
                 <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
             </button>
             <button class="btn-custom btn-custom-primary btn-custom-sm" data-bs-toggle="modal" data-bs-target="#modalInscribir" onclick="prepararSelectsInscripcion()">
-                <i class="bi bi-plus-lg me-1"></i> Nueva Inscripción
+                <i class="bi bi-plus-lg me-1"></i> Nueva Asignatura
             </button>
         </div>
     </div>
@@ -40,7 +36,7 @@
                     <tr>
                         <td colspan="4" class="text-center py-5 text-muted">
                             <div class="spinner-border spinner-border-sm text-pink me-2" role="status" style="color: var(--pink);"></div>
-                            Cargando inscripciones desde <code>/api/student-courses/</code>...
+                            Cargando asignaturas...
                         </td>
                     </tr>
                 </tbody>
@@ -76,7 +72,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-custom btn-custom-ghost btn-custom-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn-custom btn-custom-primary btn-custom-sm"><i class="bi bi-check2 me-1"></i> Registrar Inscripción</button>
+                    <button type="submit" class="btn-custom btn-custom-primary btn-custom-sm"><i class="bi bi-check2 me-1"></i> Registrar Asignatura</button>
                 </div>
             </form>
         </div>
@@ -130,7 +126,7 @@
                 inscripcionesGlobales = data;
                 tabla.innerHTML = '';
                 if (data.length === 0) {
-                    tabla.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-muted">No hay inscripciones registradas.</td></tr>';
+                    tabla.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-muted">No hay asignaturas registradas.</td></tr>';
                     return;
                 }
                 data.forEach(sc => {

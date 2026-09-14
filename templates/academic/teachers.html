@@ -6,12 +6,8 @@
 <div class="container py-5">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3" style="border-bottom: 1px solid var(--border);">
         <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="card-tag mb-0">Enmascaramiento DRF</span>
-                <span class="badge-custom font-monospace">Endpoint: /api/teachers/</span>
-            </div>
-            <h2 class="h3 fw-bold mb-0">Listado de Docentes</h2>
-            <p class="text-muted small mb-0">Entidad <code>Teacher</code> consumida de forma asíncrona mediante <code>fetch()</code>.</p>
+            <h2 class="h3 fw-bold mb-0">Docentes</h2>
+            <p class="text-muted small mb-0">Consulta y administra los docentes registrados.</p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn-custom btn-custom-ghost btn-custom-sm" onclick="cargarDocentes()" title="Recargar tabla">
@@ -33,14 +29,15 @@
                         <th style="padding-left: 24px;">ID</th>
                         <th>Nombre</th>
                         <th>Apellido</th>
+                        <th>Tipo</th>
                         <th style="text-align: right; padding-right: 24px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-docentes">
                     <tr>
-                        <td colspan="4" class="text-center py-5 text-muted">
+                        <td colspan="5" class="text-center py-5 text-muted">
                             <div class="spinner-border spinner-border-sm text-pink me-2" role="status" style="color: var(--pink);"></div>
-                            Cargando docentes desde <code>/api/teachers/</code>...
+                            Cargando docentes...
                         </td>
                     </tr>
                 </tbody>
@@ -68,6 +65,13 @@
                     <div class="form-field">
                         <label for="crear-teacher-lastname">Apellido</label>
                         <input type="text" id="crear-teacher-lastname" required placeholder="Ej: Alvarado">
+                    </div>
+                    <div class="form-field">
+                        <label for="crear-teacher-type">Tipo de profesor</label>
+                        <select id="crear-teacher-type" class="form-select" required>
+                            <option value="CH">Jornada por hora</option>
+                            <option value="CD">Jornada definida</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -99,6 +103,13 @@
                     <div class="form-field">
                         <label for="editar-teacher-lastname">Apellido</label>
                         <input type="text" id="editar-teacher-lastname" required>
+                    </div>
+                    <div class="form-field">
+                        <label for="editar-teacher-type">Tipo de profesor</label>
+                        <select id="editar-teacher-type" class="form-select" required>
+                            <option value="CH">Jornada por hora</option>
+                            <option value="CD">Jornada definida</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -159,7 +170,7 @@
                 docentesGlobales = data;
                 tabla.innerHTML = '';
                 if (data.length === 0) {
-                    tabla.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-muted">No hay docentes registrados.</td></tr>';
+                    tabla.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">No hay docentes registrados.</td></tr>';
                     return;
                 }
                 data.forEach(t => {
@@ -168,6 +179,7 @@
                         <td style="padding-left: 24px; font-weight: 700; color: var(--pink);">#${t.id}</td>
                         <td style="font-weight: 600; color: var(--text);">${t.first_name}</td>
                         <td style="color: var(--text);">${t.last_name}</td>
+                        <td><span class="badge-custom badge-pink">${t.teacher_type}</span></td>
                         <td style="text-align: right; padding-right: 24px;">
                             <button class="btn-custom btn-custom-outline btn-custom-sm me-1" onclick="abrirModalEditarDocente(${t.id})" title="Editar"><i class="bi bi-pencil"></i></button>
                             <button class="btn-custom btn-custom-danger btn-custom-sm" onclick="eliminarDocente(${t.id}, '${t.first_name} ${t.last_name}')" title="Eliminar"><i class="bi bi-trash"></i></button>
@@ -178,14 +190,15 @@
             })
             .catch(err => {
                 console.error(err);
-                tabla.innerHTML = `<tr><td colspan="4" class="text-center py-4" style="color: var(--red);">Error al cargar: ${err.message}</td></tr>`;
+                tabla.innerHTML = `<tr><td colspan="5" class="text-center py-4" style="color: var(--red);">Error al cargar: ${err.message}</td></tr>`;
             });
     }
 
     function guardarDocente() {
         const datos = {
             first_name: document.getElementById('crear-teacher-firstname').value.trim(),
-            last_name: document.getElementById('crear-teacher-lastname').value.trim()
+            last_name: document.getElementById('crear-teacher-lastname').value.trim(),
+            teacher_type: document.getElementById('crear-teacher-type').value
         };
 
         fetch('/api/teachers/', {
@@ -208,6 +221,7 @@
         document.getElementById('editar-teacher-id').value = t.id;
         document.getElementById('editar-teacher-firstname').value = t.first_name;
         document.getElementById('editar-teacher-lastname').value = t.last_name;
+        document.getElementById('editar-teacher-type').value = t.teacher_type;
         modalEditarBS.show();
     }
 
@@ -215,7 +229,8 @@
         const id = document.getElementById('editar-teacher-id').value;
         const datos = {
             first_name: document.getElementById('editar-teacher-firstname').value.trim(),
-            last_name: document.getElementById('editar-teacher-lastname').value.trim()
+            last_name: document.getElementById('editar-teacher-lastname').value.trim(),
+            teacher_type: document.getElementById('editar-teacher-type').value
         };
 
         fetch(`/api/teachers/${id}/`, {

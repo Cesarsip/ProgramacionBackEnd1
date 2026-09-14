@@ -7,12 +7,8 @@
     <!-- Header de la sección -->
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3" style="border-bottom: 1px solid var(--border);">
         <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="card-tag mb-0">Enmascaramiento DRF</span>
-                <span class="badge-custom font-monospace">Endpoint: /api/courses/</span>
-            </div>
-            <h2 class="h3 fw-bold mb-0">Listado de Cursos y Profesores Asignados</h2>
-            <p class="text-muted small mb-0">Entidad <code>Course</code> con relación de clave foránea a <code>Teacher</code>.</p>
+            <h2 class="h3 fw-bold mb-0">Cursos y docentes</h2>
+            <p class="text-muted small mb-0">Consulta y administra la oferta de asignaturas.</p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn-custom btn-custom-ghost btn-custom-sm" onclick="cargarCursos()" title="Recargar tabla">
@@ -59,7 +55,7 @@
                     <tr>
                         <td colspan="5" class="text-center py-5 text-muted">
                             <div class="spinner-border spinner-border-sm text-pink me-2" role="status" style="color: var(--pink);"></div>
-                            Cargando datos asíncronos desde <code>/api/courses/</code>...
+                            Cargando cursos...
                         </td>
                     </tr>
                 </tbody>
@@ -67,20 +63,6 @@
         </div>
     </div>
 
-    <!-- Acordeón: Inspección en Vivo del JSON REST -->
-    <div class="card-panel p-0 overflow-hidden mb-5">
-        <div class="p-3 d-flex justify-content-between align-items-center" style="background: var(--bg-panel-2); cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#collapseDRF">
-            <span class="fw-bold small" style="color: var(--text);">
-                <i class="bi bi-braces me-2 text-pink" style="color: var(--pink);"></i> Inspeccionar Respuesta JSON en Tiempo Real (/api/courses/)
-            </span>
-            <i class="bi bi-chevron-down text-muted"></i>
-        </div>
-        <div id="collapseDRF" class="collapse">
-            <div class="p-3" style="background: #09090c; border-top: 1px solid var(--border);">
-                <pre id="json-raw-output" class="font-monospace mb-0" style="color: #38bdf8; font-size: 0.85rem; max-height: 250px; overflow-y: auto;">// Aquí se refleja la respuesta devuelta por DRF</pre>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- MODAL: Crear Curso -->
@@ -103,9 +85,8 @@
                         <label for="crear-course-shift">Jornada</label>
                         <select id="crear-course-shift" class="form-select" required>
                             <option value="">Seleccione una jornada...</option>
-                            <option value="diurna">Diurna</option>
-                            <option value="vespertina">Vespertina</option>
-                            <option value="online">Online</option>
+                            <option value="D">Despertino</option>
+                            <option value="V">Vespertino</option>
                         </select>
                     </div>
                     <div class="form-field">
@@ -145,9 +126,8 @@
                         <label for="editar-course-shift">Jornada</label>
                         <select id="editar-course-shift" class="form-select" required>
                             <option value="">Seleccione una jornada...</option>
-                            <option value="diurna">Diurna</option>
-                            <option value="vespertina">Vespertina</option>
-                            <option value="online">Online</option>
+                            <option value="D">Despertino</option>
+                            <option value="V">Vespertino</option>
                         </select>
                     </div>
                     <div class="form-field">
@@ -244,7 +224,6 @@
             .then(data => {
                 cursosGlobales = data;
                 renderizarTablaCursos(data);
-                document.getElementById('json-raw-output').textContent = JSON.stringify(data, null, 2);
                 document.getElementById('contador-cursos').textContent = `${data.length} Asignaturas`;
             })
             .catch(err => {
@@ -300,7 +279,7 @@
             body: JSON.stringify(datos)
         })
         .then(res => {
-            if (!res.ok) throw new Error('Error al registrar asignatura en DRF');
+            if (!res.ok) throw new Error('No se pudo registrar la asignatura');
             return res.json();
         })
         .then(data => {

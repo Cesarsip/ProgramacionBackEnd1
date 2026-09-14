@@ -10,8 +10,21 @@ class Teacher(models.Model):
     Entidad Docente (teacher)
     Representa a los profesores que imparten las asignaturas.
     """
+    # Limita el tipo de contrato/jornada a los valores definidos por la
+    # evaluación. Si se elimina choices, podrían guardarse valores inválidos.
+    TEACHER_TYPE_CHOICES = (
+        ('CH', 'Jornada por hora'),
+        ('CD', 'Jornada definida'),
+    )
+
     first_name = models.CharField(max_length=100, verbose_name="Nombre")
     last_name = models.CharField(max_length=100, verbose_name="Apellido")
+    teacher_type = models.CharField(
+        max_length=2,
+        choices=TEACHER_TYPE_CHOICES,
+        default='CH',
+        verbose_name="Tipo de profesor",
+    )
 
     class Meta:
         db_table = 'teacher'
@@ -27,11 +40,18 @@ class Course(models.Model):
     Entidad Asignatura (course)
     Representa los cursos impartidos por un docente (Relación 1 a N).
     """
+    # El código se almacena en la base de datos y la etiqueta se muestra
+    # al usuario. Sin choices, shift aceptaría cualquier texto.
+    SHIFT_CHOICES = (
+        ('D', 'Despertino'),
+        ('V', 'Vespertino'),
+    )
+
     name = models.CharField(max_length=150, verbose_name="Nombre de Asignatura")
     shift = models.CharField(
-        max_length=20,
-        blank=True,
-        default='',
+        max_length=1,
+        choices=SHIFT_CHOICES,
+        default='D',
         verbose_name="Jornada",
     )
     teacher = models.ForeignKey(
@@ -56,12 +76,19 @@ class Student(models.Model):
     Entidad Estudiante (student)
     Representa a los alumnos matriculados en la institución.
     """
+    # Restringe sexo a Masculino o Femenino según el requisito. El serializer
+    # también valida esta lista al recibir JSON.
+    GENDER_CHOICES = (
+        ('M', 'Masculino'),
+        ('F', 'Femenino'),
+    )
+
     first_name = models.CharField(max_length=100, verbose_name="Nombre")
     last_name = models.CharField(max_length=100, verbose_name="Apellido")
     gender = models.CharField(
-        max_length=30,
-        blank=True,
-        default='',
+        max_length=1,
+        choices=GENDER_CHOICES,
+        default='M',
         verbose_name="Sexo",
     )
 

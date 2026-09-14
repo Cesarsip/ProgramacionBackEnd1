@@ -6,6 +6,8 @@ from .models import Teacher, Course, Student, StudentCourse
 
 class AcademicSystemTests(APITestCase):
     def setUp(self):
+        # Datos mínimos reutilizados por cada prueba. Si se elimina este
+        # bloque, las pruebas no tendrían entidades relacionadas para operar.
         self.teacher = Teacher.objects.create(first_name="Marcelo", last_name="Alvarado")
         self.course = Course.objects.create(name="Desarrollo Backend", teacher=self.teacher)
         self.student = Student.objects.create(first_name="César", last_name="Silva")
@@ -86,14 +88,14 @@ class AcademicSystemTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_api_filters(self):
-        self.course.shift = 'vespertina'
+        self.course.shift = 'V'
         self.course.save(update_fields=['shift'])
-        self.student.gender = 'femenino'
+        self.student.gender = 'F'
         self.student.save(update_fields=['gender'])
 
         teachers = self.client.get('/api/teachers/?last_name=alvar')
-        courses = self.client.get('/api/courses/?shift=VESPERTINA')
-        students = self.client.get('/api/students/?gender=FEMENINO')
+        courses = self.client.get('/api/courses/?shift=V')
+        students = self.client.get('/api/students/?gender=F')
         enrollments = self.client.get(f'/api/student-courses/?course={self.course.id}')
 
         self.assertEqual(len(teachers.data), 1)
@@ -104,3 +106,21 @@ class AcademicSystemTests(APITestCase):
     def test_api_documentation(self):
         response = self.client.get('/docs/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_swagger_documentation(self):
+        response = self.client.get('/swagger/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_student_courses_are_publicly_readable(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get('/api/student-courses/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_student_courses_writes_require_authentication(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.post(
+            '/api/student-courses/',
+            {'student': self.student.id, 'course': self.course.id},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

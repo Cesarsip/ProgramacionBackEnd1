@@ -14,6 +14,8 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Usa BigAutoField para que las claves primarias sean consistentes en todas
+# las tablas. Si se elimina, Django puede generar advertencias de configuración.
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
@@ -38,8 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # DRF crea la API; django_filters habilita filtros por URL y drf_yasg
+    # genera Swagger/OpenAPI. Si se eliminan, esas integraciones no cargarán.
     'rest_framework',
     'django_filters',
+    'drf_yasg',
     # Aplicación académica
     'academic',
 ]
@@ -132,14 +137,22 @@ MAILERS = {
 }
 
 REST_FRAMEWORK = {
+    # JWT valida el encabezado Authorization: Bearer <token>. Sin esta
+    # entrada, DRF no podría autenticar las peticiones con tokens JWT.
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    # Protege la API por defecto. Los ViewSet pueden declarar excepciones
+    # explícitas, como la lectura pública de asignaciones.
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    # Conecta django-filter con los ViewSet. Sin esto, los parámetros de
+    # consulta como ?gender=F o ?shift=V serían ignorados.
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
+    # Mantiene el esquema CoreAPI requerido por el proyecto. Swagger se
+    # configura adicionalmente en academic_project/urls.py.
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }

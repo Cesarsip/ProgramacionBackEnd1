@@ -4,6 +4,7 @@ from rest_framework import permissions, viewsets
 from .models import Teacher, Course, Student, StudentCourse
 from .serializers import TeacherSerializer, CourseSerializer, StudentSerializer, StudentCourseSerializer
 from .filters import CourseFilter, StudentCourseFilter, StudentFilter, TeacherFilter
+from .permissions import ReadOnlyOrAuthenticated
 
 # =====================================================================
 # VISTAS DE PLANTILLAS HTML (ENMASCARAMIENTO DE ENDPOINTS)
@@ -72,6 +73,8 @@ class TeacherViewSet(viewsets.ModelViewSet):
     """Endpoint REST CRUD para la entidad Teacher (/api/teachers/)."""
     queryset = Teacher.objects.all().order_by('id')
     serializer_class = TeacherSerializer
+    # ModelViewSet crea GET, POST, PUT, PATCH y DELETE. IsAuthenticated
+    # obliga a usar JWT; si se elimina, el recurso quedaría sin protección.
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TeacherFilter
@@ -81,6 +84,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     """Endpoint REST CRUD para la entidad Course (/api/courses/)."""
     queryset = Course.objects.select_related('teacher').all().order_by('id')
     serializer_class = CourseSerializer
+    # select_related evita consultas extra al mostrar el profesor asociado.
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_class = CourseFilter
@@ -90,6 +94,7 @@ class StudentViewSet(viewsets.ModelViewSet):
     """Endpoint REST CRUD para la entidad Student (/api/students/)."""
     queryset = Student.objects.prefetch_related('student_courses__course').all().order_by('id')
     serializer_class = StudentSerializer
+    # prefetch_related carga las relaciones de cursos eficientemente.
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_class = StudentFilter
@@ -99,6 +104,8 @@ class StudentCourseViewSet(viewsets.ModelViewSet):
     """Endpoint REST CRUD para la entidad StudentCourse (/api/student-courses/)."""
     queryset = StudentCourse.objects.select_related('student', 'course').all().order_by('id')
     serializer_class = StudentCourseSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # La permission personalizada deja GET público, pero protege escrituras
+    # con JWT, según el requisito de asignaturas de solo lectura pública.
+    permission_classes = [ReadOnlyOrAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_class = StudentCourseFilter

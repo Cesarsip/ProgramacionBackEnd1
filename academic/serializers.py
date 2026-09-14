@@ -10,7 +10,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     """Serializador para la entidad Teacher (Docentes)."""
     class Meta:
         model = Teacher
-        fields = ['id', 'first_name', 'last_name']
+        fields = ['id', 'first_name', 'last_name', 'teacher_type']
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -19,6 +19,8 @@ class CourseSerializer(serializers.ModelSerializer):
     Incluye el nombre del profesor asignado para facilitar el consumo del frontend.
     """
     teacher_name = serializers.SerializerMethodField(read_only=True)
+    # Este campo es calculado y solo lectura; facilita mostrar el profesor sin
+    # hacer otra petición. Si se elimina, la API devolverá solo teacher (ID).
 
     class Meta:
         model = Course
@@ -33,6 +35,8 @@ class CourseSerializer(serializers.ModelSerializer):
 class StudentSerializer(serializers.ModelSerializer):
     """Serializador para la entidad Student (Estudiantes)."""
     enrolled_courses = serializers.SerializerMethodField(read_only=True)
+    # Expone nombres de cursos inscritos sin permitir que el cliente modifique
+    # la relación desde este serializer.
 
     class Meta:
         model = Student
@@ -47,6 +51,8 @@ class StudentCourseSerializer(serializers.ModelSerializer):
     """Serializador para la entidad intermedia StudentCourse (Inscripciones)."""
     student_name = serializers.SerializerMethodField(read_only=True)
     course_name = serializers.SerializerMethodField(read_only=True)
+    # Los nombres son informativos; student y course siguen siendo los IDs
+    # usados para crear o modificar la asignación.
 
     class Meta:
         model = StudentCourse
