@@ -207,18 +207,38 @@
                     tabla.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-muted">No hay asignaturas registradas.</td></tr>';
                     return;
                 }
+                const estudiantes = new Map();
                 data.forEach(sc => {
+                    if (!estudiantes.has(sc.student)) {
+                        estudiantes.set(sc.student, {
+                            id: sc.student,
+                            name: sc.student_name,
+                            asignaturas: []
+                        });
+                    }
+                    estudiantes.get(sc.student).asignaturas.push(sc);
+                });
+
+                estudiantes.forEach(estudiante => {
                     const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td style="padding-left: 24px; font-weight: 700; color: var(--pink);">#${sc.id}</td>
-                        <td style="font-weight: 600; color: var(--text);"><i class="bi bi-mortarboard-fill text-pink me-2"></i>${sc.student_name}</td>
-                        <td><span class="badge-custom badge-purple"><i class="bi bi-journal-check me-1"></i>${sc.course_name}</span></td>
-                        <td style="text-align: right; padding-right: 24px;">
-                            <button class="btn-custom btn-custom-outline btn-custom-sm me-1" onclick="abrirModalEditarAsignatura(${sc.id})" title="Editar">
+                    const asignaturasHtml = estudiante.asignaturas.map(sc => `
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge-custom badge-purple">
+                                <i class="bi bi-journal-check me-1"></i>${sc.course_name}
+                            </span>
+                            <button class="btn-custom btn-custom-outline btn-custom-sm" onclick="abrirModalEditarAsignatura(${sc.id})" title="Editar asignatura">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button class="btn-custom btn-custom-danger btn-custom-sm" onclick="eliminarInscripcion(${sc.id})" title="Anular inscripción"><i class="bi bi-trash"></i></button>
-                        </td>
+                            <button class="btn-custom btn-custom-danger btn-custom-sm" onclick="eliminarInscripcion(${sc.id})" title="Eliminar asignatura">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                    fila.innerHTML = `
+                        <td style="padding-left: 24px; font-weight: 700; color: var(--pink);">#${estudiante.id}</td>
+                        <td style="font-weight: 600; color: var(--text);"><i class="bi bi-mortarboard-fill text-pink me-2"></i>${estudiante.name}</td>
+                        <td>${asignaturasHtml}</td>
+                        <td style="text-align: right; padding-right: 24px;">${estudiante.asignaturas.length} asignatura(s)</td>
                     `;
                     tabla.appendChild(fila);
                 });
