@@ -78,21 +78,99 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalEditarAsignatura" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h5 class="modal-title fw-bold"><span class="logo-dot"></span>Editar Asignatura</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="form-editar-asignatura" onsubmit="event.preventDefault(); actualizarAsignatura();">
+                <input type="hidden" id="editar-asignatura-id">
+                <div class="modal-body p-4">
+                    <div class="form-field">
+                        <label for="editar-asignatura-student">Estudiante</label>
+                        <select id="editar-asignatura-student" class="form-select" required></select>
+                    </div>
+                    <div class="form-field">
+                        <label for="editar-asignatura-course">Asignatura</label>
+                        <select id="editar-asignatura-course" class="form-select" required></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-custom btn-custom-ghost btn-custom-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-custom btn-custom-primary btn-custom-sm"><i class="bi bi-check2 me-1"></i> Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     let inscripcionesGlobales = [];
     let modalInscribirBS = null;
+    let modalEditarAsignaturaBS = null;
 
     document.addEventListener('DOMContentLoaded', () => {
         modalInscribirBS = new bootstrap.Modal(document.getElementById('modalInscribir'));
+        modalEditarAsignaturaBS = new bootstrap.Modal(document.getElementById('modalEditarAsignatura'));
         cargarInscripciones();
     });
 
     function getCsrfToken() {
         const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
         return tokenInput ? tokenInput.value : '';
+    }
+
+    function abrirModalEditarAsignatura(id) {
+        const asignatura = inscripcionesGlobales.find(item => item.id === id);
+        if (!asignatura) return;
+
+        Promise.all([
+            fetch('/api/students/').then(response => response.json()),
+            fetch('/api/courses/').then(response => response.json())
+        ]).then(([students, courses]) => {
+            const studentSelect = document.getElementById('editar-asignatura-student');
+            const courseSelect = document.getElementById('editar-asignatura-course');
+            studentSelect.innerHTML = students.map(student =>
+                `<option value="${student.id}" ${student.id === asignatura.student ? 'selected' : ''}>${student.first_name} ${student.last_name}</option>`
+            ).join('');
+            courseSelect.innerHTML = courses.map(course =>
+                `<option value="${course.id}" ${course.id === asignatura.course ? 'selected' : ''}>${course.name}</option>`
+            ).join('');
+            document.getElementById('editar-asignatura-id').value = id;
+            modalEditarAsignaturaBS.show();
+        });
+    }
+
+    function actualizarAsignatura() {
+        const id = document.getElementById('editar-asignatura-id').value;
+        const datos = {
+            student: parseInt(document.getElementById('editar-asignatura-student').value),
+            course: parseInt(document.getElementById('editar-asignatura-course').value)
+        };
+
+        fetch(`/api/student-courses/${id}/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify(datos)
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('No se pudo actualizar la asignatura');
+            return response.json();
+        })
+        .then(() => {
+            modalEditarAsignaturaBS.hide();
+            mostrarAlerta('Asignatura actualizada correctamente.', 'success');
+            cargarInscripciones();
+        })
+        .catch(error => mostrarAlerta(`Error al actualizar: ${error.message}`, 'danger'));
     }
 
     function mostrarAlerta(mensaje, tipo = 'success') {
@@ -136,6 +214,9 @@
                         <td style="font-weight: 600; color: var(--text);"><i class="bi bi-mortarboard-fill text-pink me-2"></i>${sc.student_name}</td>
                         <td><span class="badge-custom badge-purple"><i class="bi bi-journal-check me-1"></i>${sc.course_name}</span></td>
                         <td style="text-align: right; padding-right: 24px;">
+                            <button class="btn-custom btn-custom-outline btn-custom-sm me-1" onclick="abrirModalEditarAsignatura(${sc.id})" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
                             <button class="btn-custom btn-custom-danger btn-custom-sm" onclick="eliminarInscripcion(${sc.id})" title="Anular inscripción"><i class="bi bi-trash"></i></button>
                         </td>
                     `;

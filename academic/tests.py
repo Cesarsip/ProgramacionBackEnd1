@@ -27,6 +27,10 @@ class AcademicSystemTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'academic/login.html')
 
+    def test_unknown_url_redirects_to_home(self):
+        response = self.client.get('/hola')
+        self.assertRedirects(response, '/')
+
     def test_jwt_login(self):
         response = self.client.post(
             '/api/token/',

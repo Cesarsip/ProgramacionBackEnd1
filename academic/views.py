@@ -1,4 +1,4 @@
-﻿from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets
 from .models import Teacher, Course, Student, StudentCourse
@@ -61,7 +61,12 @@ def custom_404_view(request, exception=None):
     Manejador personalizado de error 404 para redirigir al usuario
     de forma segura ante rutas no encontradas.
     """
-    return render(request, '404.html', status=404)
+    return redirect('index')
+
+
+def fallback_view(request, path=''):
+    """Envía cualquier ruta no registrada a la página de inicio."""
+    return redirect('index')
 
 
 # =====================================================================

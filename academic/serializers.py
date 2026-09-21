@@ -24,7 +24,10 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ['id', 'name', 'shift', 'teacher', 'teacher_name']
+        fields = [
+            'id', 'code', 'name', 'description', 'credits', 'semester',
+            'shift', 'teacher', 'teacher_name',
+        ]
 
     def get_teacher_name(self, obj):
         if obj.teacher:

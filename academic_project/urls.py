@@ -1,10 +1,11 @@
 ﻿from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework.documentation import include_docs_urls
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
+from academic import views
 
 # Define el documento OpenAPI que consumirá Swagger UI. Si se elimina, las
 # rutas /swagger/ y /swagger.json no podrán construir la documentación.
@@ -31,6 +32,7 @@ urlpatterns = [
     # contrato OpenAPI para herramientas externas.
     path('swagger.json', schema_view.without_ui(cache_timeout=0), name='swagger-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
+    re_path(r'^(?P<path>.*)$', views.fallback_view, name='fallback'),
 ]
 
 # Manejador personalizado de error 404

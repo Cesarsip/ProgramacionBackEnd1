@@ -47,7 +47,15 @@ class Course(models.Model):
         ('V', 'Vespertino'),
     )
 
+    code = models.CharField(
+        max_length=12,
+        default='ASIG-000',
+        verbose_name="Código de asignatura",
+    )
     name = models.CharField(max_length=150, verbose_name="Nombre de Asignatura")
+    description = models.TextField(blank=True, default='', verbose_name="Descripción")
+    credits = models.PositiveSmallIntegerField(default=6, verbose_name="Créditos")
+    semester = models.PositiveSmallIntegerField(default=1, verbose_name="Semestre")
     shift = models.CharField(
         max_length=1,
         choices=SHIFT_CHOICES,

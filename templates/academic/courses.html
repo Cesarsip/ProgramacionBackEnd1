@@ -8,7 +8,7 @@
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3" style="border-bottom: 1px solid var(--border);">
         <div>
             <h2 class="h3 fw-bold mb-0">Cursos y docentes</h2>
-            <p class="text-muted small mb-0">Consulta y administra la oferta de asignaturas.</p>
+            <p class="text-muted small mb-0">Plan de estudios de Informática y Ciberseguridad.</p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn-custom btn-custom-ghost btn-custom-sm" onclick="cargarCursos()" title="Recargar tabla">
@@ -44,16 +44,18 @@
             <table class="table-custom mb-0">
                 <thead>
                     <tr>
-                        <th style="padding-left: 24px;">ID</th>
-                        <th>Nombre de la Asignatura</th>
+                        <th style="padding-left: 24px;">Código</th>
+                        <th>Asignatura</th>
+                        <th>Créditos</th>
+                        <th>Semestre</th>
                         <th>Jornada</th>
-                        <th>Profesor Asignado (Teacher)</th>
+                        <th>Docente</th>
                         <th style="text-align: right; padding-right: 24px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-cursos">
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
+                        <td colspan="7" class="text-center py-5 text-muted">
                             <div class="spinner-border spinner-border-sm text-pink me-2" role="status" style="color: var(--pink);"></div>
                             Cargando cursos...
                         </td>
@@ -78,8 +80,26 @@
             <form id="form-crear-curso" onsubmit="event.preventDefault(); guardarCurso();">
                 <div class="modal-body p-4">
                     <div class="form-field">
+                        <label for="crear-course-code">Código</label>
+                        <input type="text" id="crear-course-code" required placeholder="Ej: INF-204">
+                    </div>
+                    <div class="form-field">
                         <label for="crear-course-name">Nombre de la Asignatura</label>
                         <input type="text" id="crear-course-name" required placeholder="Ej: Arquitectura de Software Backend">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 form-field">
+                            <label for="crear-course-credits">Créditos</label>
+                            <input type="number" id="crear-course-credits" min="1" max="12" value="6" required>
+                        </div>
+                        <div class="col-md-6 form-field">
+                            <label for="crear-course-semester">Semestre</label>
+                            <input type="number" id="crear-course-semester" min="1" max="10" value="1" required>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label for="crear-course-description">Descripción</label>
+                        <textarea id="crear-course-description" rows="2" placeholder="Describe los principales contenidos de la asignatura"></textarea>
                     </div>
                     <div class="form-field">
                         <label for="crear-course-shift">Jornada</label>
@@ -119,8 +139,26 @@
                 <input type="hidden" id="editar-course-id">
                 <div class="modal-body p-4">
                     <div class="form-field">
+                        <label for="editar-course-code">Código</label>
+                        <input type="text" id="editar-course-code" required>
+                    </div>
+                    <div class="form-field">
                         <label for="editar-course-name">Nombre de la Asignatura</label>
                         <input type="text" id="editar-course-name" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 form-field">
+                            <label for="editar-course-credits">Créditos</label>
+                            <input type="number" id="editar-course-credits" min="1" max="12" required>
+                        </div>
+                        <div class="col-md-6 form-field">
+                            <label for="editar-course-semester">Semestre</label>
+                            <input type="number" id="editar-course-semester" min="1" max="10" required>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label for="editar-course-description">Descripción</label>
+                        <textarea id="editar-course-description" rows="2"></textarea>
                     </div>
                     <div class="form-field">
                         <label for="editar-course-shift">Jornada</label>
@@ -238,15 +276,17 @@
         tabla.innerHTML = '';
 
         if (lista.length === 0) {
-            tabla.innerHTML = `<tr><td colspan="4" class="text-center py-5 text-muted">No hay asignaturas registradas. Haz clic en "Nuevo Curso" para agregar una.</td></tr>`;
+            tabla.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted">No hay asignaturas registradas. Haz clic en "Nuevo Curso" para agregar una.</td></tr>`;
             return;
         }
 
         lista.forEach(c => {
             const fila = document.createElement('tr');
             fila.innerHTML = `
-                <td style="padding-left: 24px; font-weight: 700; color: var(--pink);">#${c.id}</td>
+                <td style="padding-left: 24px; font-weight: 700; color: var(--pink);">${c.code || 'ASIG-000'}</td>
                 <td style="font-weight: 600; color: var(--text);">${c.name}</td>
+                <td>${c.credits || 0}</td>
+                <td>${c.semester || 1}°</td>
                 <td><span class="badge-custom badge-pink">${c.shift || 'Sin jornada'}</span></td>
                 <td><span class="badge-custom badge-purple"><i class="bi bi-person-fill me-1"></i>${c.teacher_name}</span></td>
                 <td style="text-align: right; padding-right: 24px;">
@@ -265,7 +305,11 @@
     // 3. Registrar Nuevo Curso (POST)
     function guardarCurso() {
         const datos = {
+            code: document.getElementById('crear-course-code').value.trim(),
             name: document.getElementById('crear-course-name').value.trim(),
+            description: document.getElementById('crear-course-description').value.trim(),
+            credits: parseInt(document.getElementById('crear-course-credits').value),
+            semester: parseInt(document.getElementById('crear-course-semester').value),
             shift: document.getElementById('crear-course-shift').value,
             teacher: parseInt(document.getElementById('crear-course-teacher').value)
         };
@@ -300,7 +344,11 @@
         if (!curso) return;
 
         document.getElementById('editar-course-id').value = curso.id;
+        document.getElementById('editar-course-code').value = curso.code || '';
         document.getElementById('editar-course-name').value = curso.name;
+        document.getElementById('editar-course-description').value = curso.description || '';
+        document.getElementById('editar-course-credits').value = curso.credits || 6;
+        document.getElementById('editar-course-semester').value = curso.semester || 1;
         document.getElementById('editar-course-shift').value = curso.shift || '';
         cargarDocentesSelect('editar-course-teacher', curso.teacher);
 
@@ -311,7 +359,11 @@
     function actualizarCurso() {
         const id = document.getElementById('editar-course-id').value;
         const datos = {
+            code: document.getElementById('editar-course-code').value.trim(),
             name: document.getElementById('editar-course-name').value.trim(),
+            description: document.getElementById('editar-course-description').value.trim(),
+            credits: parseInt(document.getElementById('editar-course-credits').value),
+            semester: parseInt(document.getElementById('editar-course-semester').value),
             shift: document.getElementById('editar-course-shift').value,
             teacher: parseInt(document.getElementById('editar-course-teacher').value)
         };
